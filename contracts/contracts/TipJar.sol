@@ -20,6 +20,7 @@ contract TipJar is Ownable2Step, Pausable, ReentrancyGuard {
 
     mapping(bytes32 handleHash => address payoutAddress) private _handleOwner;
     mapping(bytes32 handleHash => string handle) private _handleText;
+    mapping(address owner => string handle) public ownerHandle;
 
     event HandleRegistered(string handle, address indexed owner);
     event Tipped(
@@ -56,6 +57,7 @@ contract TipJar is Ownable2Step, Pausable, ReentrancyGuard {
 
         _handleOwner[key] = msg.sender;
         _handleText[key] = handle;
+        ownerHandle[msg.sender] = handle;
         emit HandleRegistered(handle, msg.sender);
     }
 

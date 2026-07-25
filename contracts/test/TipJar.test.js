@@ -17,6 +17,14 @@ describe("TipJar", () => {
     expect(await tipJar.handleOwner("rowan")).to.equal(creator.address);
   });
 
+  it("supports a direct reverse lookup from owner address to handle", async () => {
+    const { tipJar, creator, other } = await deploy();
+    expect(await tipJar.ownerHandle(creator.address)).to.equal("");
+    await tipJar.connect(creator).register("rowan");
+    expect(await tipJar.ownerHandle(creator.address)).to.equal("rowan");
+    expect(await tipJar.ownerHandle(other.address)).to.equal("");
+  });
+
   it("rejects a handle that is already taken", async () => {
     const { tipJar, creator, other } = await deploy();
     await tipJar.connect(creator).register("rowan");

@@ -29,33 +29,47 @@
   }
 
   async function findOwnHandle(address) {
+    // Direct mapping lookup — not a log scan. Arc testnet is already past block
+    // 50M, and public RPCs reject/rate-limit unbounded eth_getLogs queries, so
+    // "search history for my registration" doesn't scale. ownerHandle() does.
     const readContract = await readContractPromise;
-    const events = await readContract.queryFilter(
-      readContract.filters.HandleRegistered(null, address)
-    );
-    if (events.length === 0) return null;
-    return events[events.length - 1].args.handle;
+    const handle = await readContract.ownerHandle(address);
+    return handle || null;
   }
 
+  // Recent-tips is a best-effort convenience feature, so it only looks at a
+  // bounded recent window and fails quietly rather than breaking the dashboard —
+  // see findOwnHandle for why an unbounded query isn't an option here.
+  const RECENT_TIPS_BLOCK_WINDOW = 1000;
+
   async function loadRecentTips(address) {
-    const readContract = await readContractPromise;
-    const events = await readContract.queryFilter(
-      readContract.filters.Tipped(null, address)
-    );
-    if (events.length === 0) {
-      tipList.innerHTML = `<p class="hint">No tips yet — they'll show up here as they arrive.</p>`;
-      return;
+    try {
+      const readContract = await readContractPromise;
+      const provider = readContract.runner.provider;
+      const latest = await provider.getBlockNumber();
+      const fromBlock = Math.max(0, latest - RECENT_TIPS_BLOCK_WINDOW);
+      const events = await readContract.queryFilter(
+        readContract.filters.Tipped(null, address),
+        fromBlock,
+        latest
+      );
+      if (events.length === 0) {
+        tipList.innerHTML = `<p class="hint">No tips in the last ${RECENT_TIPS_BLOCK_WINDOW} blocks — they'll show up here as they arrive.</p>`;
+        return;
+      }
+      const rows = events
+        .slice(-10)
+        .reverse()
+        .map((e) => {
+          const { sender, amount, message } = e.args;
+          const note = message ? ` — "${message}"` : "";
+          return `<div class="tip-row"><span class="who">${shortAddress(sender)}${note}</span><span class="amt">${ethers.formatEther(amount)} USDC</span></div>`;
+        })
+        .join("");
+      tipList.innerHTML = rows;
+    } catch (err) {
+      tipList.innerHTML = `<p class="hint">Couldn't load recent tips right now — your page still works, this is just the activity list.</p>`;
     }
-    const rows = events
-      .slice(-10)
-      .reverse()
-      .map((e) => {
-        const { sender, amount, message } = e.args;
-        const note = message ? ` — "${message}"` : "";
-        return `<div class="tip-row"><span class="who">${shortAddress(sender)}${note}</span><span class="amt">${ethers.formatEther(amount)} USDC</span></div>`;
-      })
-      .join("");
-    tipList.innerHTML = rows;
   }
 
   async function refreshState() {

@@ -10,13 +10,14 @@ const ARC_TESTNET = {
   blockExplorerUrls: ["https://testnet.arcscan.app"],
 };
 
-const TIPJAR_ADDRESS = "0xe7381c36f3Adb493005d16b39B0C8300cb7e5c51";
+const TIPJAR_ADDRESS = "0xb2f2DB422756b139E0627744176b137E23FdA30a";
 
 const TIPJAR_ABI = [
   "function register(string handle)",
   "function tip(string handle, string message) payable",
   "function handleOwner(string handle) view returns (address)",
   "function isHandleTaken(string handle) view returns (bool)",
+  "function ownerHandle(address owner) view returns (string)",
   "function feeBps() view returns (uint256)",
   "event HandleRegistered(string handle, address indexed owner)",
   "event Tipped(string handle, address indexed recipient, address indexed sender, uint256 amount, uint256 fee, string message)",

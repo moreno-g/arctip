@@ -4,9 +4,10 @@
   "rpcUrl": "https://rpc.testnet.arc.network",
   "blockExplorer": "https://testnet.arcscan.app",
   "contract": "TipJar",
-  "address": "0xe7381c36f3Adb493005d16b39B0C8300cb7e5c51",
+  "address": "0xb2f2DB422756b139E0627744176b137E23FdA30a",
   "deployer": "0x5c32a3A5DbaEEB9f35D47586be1dbc7D05dA96be",
   "treasury": "0x5c32a3A5DbaEEB9f35D47586be1dbc7D05dA96be",
   "feeBps": 200,
-  "deployedAt": "2026-07-25"
+  "deployedAt": "2026-07-25",
+  "notes": "Redeployed to add ownerHandle(address) reverse lookup — avoids unbounded eth_getLogs scans that public Arc testnet RPCs reject/rate-limit."
 }
