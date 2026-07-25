@@ -1,6 +1,15 @@
 (() => {
-  const params = new URLSearchParams(window.location.search);
-  const handle = (params.get("handle") || "").trim().toLowerCase();
+  // Two shapes reach this page: the shareable /@handle URL, and the older
+  // ?handle= form. A Vercel rewrite serves this file for /@handle without
+  // changing the address bar, so there is no query string to read in that case —
+  // the pathname is the only place the handle appears.
+  function readHandle() {
+    const fromPath = window.location.pathname.match(/^\/@([^/]+)\/?$/);
+    if (fromPath) return decodeURIComponent(fromPath[1]);
+    return new URLSearchParams(window.location.search).get("handle") || "";
+  }
+
+  const handle = readHandle().trim().toLowerCase();
 
   const handleTitle = document.getElementById("handleTitle");
   const handleLead = document.getElementById("handleLead");

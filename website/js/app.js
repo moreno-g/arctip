@@ -36,10 +36,10 @@
     return p;
   }
 
+  // The share link is the whole product surface — keep it short enough to sit in
+  // a bio or under a stream. /@handle is served by a rewrite (see vercel.json).
   function tipLinkFor(handle) {
-    const url = new URL("tip.html", window.location.href);
-    url.searchParams.set("handle", handle);
-    return url.toString();
+    return `${window.location.origin}/@${handle}`;
   }
 
   async function findOwnHandle(address) {

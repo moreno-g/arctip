@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/@:handle", "destination": "/tip.html" },
+    { "source": "/app", "destination": "/app.html" }
+  ]
+}
