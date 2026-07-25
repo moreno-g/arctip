@@ -1,0 +1,12 @@
+{
+  "network": "arcTestnet",
+  "chainId": 5042002,
+  "rpcUrl": "https://rpc.testnet.arc.network",
+  "blockExplorer": "https://testnet.arcscan.app",
+  "contract": "TipJar",
+  "address": "0xe7381c36f3Adb493005d16b39B0C8300cb7e5c51",
+  "deployer": "0x5c32a3A5DbaEEB9f35D47586be1dbc7D05dA96be",
+  "treasury": "0x5c32a3A5DbaEEB9f35D47586be1dbc7D05dA96be",
+  "feeBps": 200,
+  "deployedAt": "2026-07-25"
+}

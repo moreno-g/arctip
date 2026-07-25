@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tip on ArcTip</title>
+  <meta name="description" content="Send a USDC tip, settled on Arc in one to two seconds." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314264A'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' fill='%23C9832A' text-anchor='middle'%3E%24%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-arc">ARC</span><span class="brand-sep">/</span><span class="brand-tip">Tip</span>
+      </a>
+      <span id="walletChip"></span>
+    </div>
+  </nav>
+
+  <main class="app-shell">
+    <span class="eyebrow">SEND A TIP</span>
+    <h1 id="handleTitle">Loading…</h1>
+    <p class="lead" id="handleLead"></p>
+
+    <div class="state-msg error" id="notFoundMsg" style="display:none;">
+      This handle hasn't been claimed yet. <a href="app.html">Claim it</a> if it's you.
+    </div>
+
+    <div class="card" id="tipCard" style="display:none;">
+      <h2>Amount</h2>
+      <div class="amount-grid">
+        <button class="amount-btn" data-amount="1" type="button">1 USDC</button>
+        <button class="amount-btn" data-amount="5" type="button">5 USDC</button>
+        <button class="amount-btn" data-amount="10" type="button">10 USDC</button>
+        <button class="amount-btn" data-amount="custom" type="button">Custom</button>
+      </div>
+      <div class="field" id="customAmountField" style="display:none;">
+        <label>Custom amount (USDC)</label>
+        <input type="number" id="customAmountInput" min="0" step="0.01" placeholder="0.00" />
+      </div>
+
+      <div class="field">
+        <label>Message (optional, public)</label>
+        <textarea id="messageInput" maxlength="140" placeholder="Say something nice…"></textarea>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="sendBtn" type="button">Connect wallet to tip</button>
+      <div id="tipMsg"></div>
+    </div>
+
+    <div class="card" id="receiptCard" style="display:none;">
+      <h2>Tip sent</h2>
+      <div class="tx-body" style="padding:0; margin-top:10px;">
+        <div class="tx-row"><span class="k">To</span><span class="v" id="receiptHandle"></span></div>
+        <div class="tx-row"><span class="k">Amount</span><span class="v amount" id="receiptAmount"></span></div>
+        <div class="tx-row"><span class="k">Network</span><span class="v">Arc</span></div>
+        <div class="tx-row"><span class="k">Status</span><span class="v" style="color:#2E7D4F;">Settled</span></div>
+      </div>
+      <a class="btn btn-outline btn-block" id="receiptExplorerLink" href="#" target="_blank" rel="noopener">View on ArcScan</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span class="fine">ArcTip is an independent project built on Arc — not affiliated with Circle. Arc is currently on testnet.</span>
+      <div class="social">
+        <a href="https://x.com/arctip" target="_blank" rel="noopener">X / Twitter</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="vendor/ethers.umd.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/wallet.js"></script>
+  <script src="js/tip.js"></script>
+</body>
+</html>

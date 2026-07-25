@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ArcTip — claim your page</title>
+  <meta name="description" content="Connect your wallet, claim your handle, and get your ArcTip page." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314264A'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' fill='%23C9832A' text-anchor='middle'%3E%24%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">
+        <span class="brand-arc">ARC</span><span class="brand-sep">/</span><span class="brand-tip">Tip</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#how-it-works">How it works</a></li>
+        <li><a href="index.html#token">Token</a></li>
+      </ul>
+      <span id="walletChip"></span>
+    </div>
+  </nav>
+
+  <main class="app-shell">
+    <span class="eyebrow">ARCTIP · TESTNET APP</span>
+    <h1>Claim your page</h1>
+    <p class="lead">Connect the wallet you want tips paid to, then claim a handle. Handles are first-come, first-served and can't be reassigned.</p>
+
+    <div class="state-msg info" id="networkNotice">
+      Running on <strong>Arc Testnet</strong> (chain 5042002). You'll need testnet USDC in your wallet — get some free from
+      <a href="https://faucet.circle.com" target="_blank" rel="noopener">faucet.circle.com</a>.
+    </div>
+
+    <div class="card" id="connectCard">
+      <h2>1. Connect wallet</h2>
+      <p class="hint">MetaMask or any injected wallet. We'll prompt you to switch to Arc Testnet if needed.</p>
+      <button class="btn btn-primary btn-block" id="connectBtn" type="button">Connect wallet</button>
+      <div id="connectMsg"></div>
+    </div>
+
+    <div class="card" id="claimCard" style="display:none;">
+      <h2>2. Claim your handle</h2>
+      <p class="hint">This is the name in your tip link — arctip.xyz/tip.html?handle=<em>you</em>. Choose carefully.</p>
+      <div class="field">
+        <label>Handle</label>
+        <div class="field-row">
+          <span class="prefix">@</span>
+          <input type="text" id="handleInput" placeholder="yourname" maxlength="32" autocomplete="off" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" id="claimBtn" type="button">Claim handle</button>
+      <div id="claimMsg"></div>
+    </div>
+
+    <div class="card" id="dashboardCard" style="display:none;">
+      <h2>Your ArcTip page is live</h2>
+      <p class="hint">Share this link in your bio, stream overlay, or wherever fans find you.</p>
+      <div class="copy-row">
+        <div class="field-row">
+          <input type="text" id="tipLinkInput" readonly />
+        </div>
+        <button class="btn btn-outline" id="copyLinkBtn" type="button">Copy</button>
+      </div>
+      <div id="copyMsg"></div>
+
+      <h2 style="margin-top:28px;">Recent tips</h2>
+      <div class="tip-list" id="tipList">
+        <p class="hint">No tips yet — they'll show up here as they arrive.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span class="fine">ArcTip is an independent project built on Arc — not affiliated with Circle. Arc is currently on testnet.</span>
+      <div class="social">
+        <a href="https://x.com/arctip" target="_blank" rel="noopener">X / Twitter</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="vendor/ethers.umd.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/wallet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
