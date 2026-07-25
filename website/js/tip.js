@@ -22,8 +22,15 @@
   let selectedAmount = null;
   let state = { signer: null, address: null, writeContract: null };
 
+  // Text as text — the strings here include wallet/RPC errors, which can carry
+  // attacker-influenced contract data.
   function showMsg(text, kind) {
-    tipMsg.innerHTML = text ? `<div class="state-msg ${kind}">${text}</div>` : "";
+    tipMsg.replaceChildren();
+    if (!text) return;
+    const box = document.createElement("div");
+    box.className = `state-msg ${kind}`;
+    box.textContent = text;
+    tipMsg.appendChild(box);
   }
 
   amountBtns.forEach((btn) => {
@@ -69,7 +76,8 @@
     } catch (err) {
       handleTitle.textContent = `@${handle}`;
       notFoundMsg.style.display = "block";
-      notFoundMsg.innerHTML = err.message || "Couldn't reach Arc Testnet right now. Try again shortly.";
+      notFoundMsg.textContent =
+        err.message || "Couldn't reach Arc Testnet right now. Try again shortly.";
     }
   }
 

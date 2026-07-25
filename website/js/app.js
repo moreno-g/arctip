@@ -18,8 +18,22 @@
   let state = { signer: null, address: null, writeContract: null };
   const readContractPromise = getReadOnlyContract();
 
+  // Always render text as text: several call sites pass wallet/RPC error strings,
+  // which can carry attacker-influenced contract data.
   function showMsg(el, text, kind) {
-    el.innerHTML = text ? `<div class="state-msg ${kind}">${text}</div>` : "";
+    el.replaceChildren();
+    if (!text) return;
+    const box = document.createElement("div");
+    box.className = `state-msg ${kind}`;
+    box.textContent = text;
+    el.appendChild(box);
+  }
+
+  function hintNode(text) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = text;
+    return p;
   }
 
   function tipLinkFor(handle) {
@@ -54,22 +68,49 @@
         latest
       );
       if (events.length === 0) {
-        tipList.innerHTML = `<p class="hint">No tips in the last ${RECENT_TIPS_BLOCK_WINDOW} blocks — they'll show up here as they arrive.</p>`;
+        tipList.replaceChildren(
+          hintNode(
+            `No tips in the last ${RECENT_TIPS_BLOCK_WINDOW} blocks — they'll show up here as they arrive.`
+          )
+        );
         return;
       }
-      const rows = events
-        .slice(-10)
-        .reverse()
-        .map((e) => {
-          const { sender, amount, message } = e.args;
-          const note = message ? ` — "${message}"` : "";
-          return `<div class="tip-row"><span class="who">${shortAddress(sender)}${note}</span><span class="amt">${ethers.formatEther(amount)} USDC</span></div>`;
-        })
-        .join("");
-      tipList.innerHTML = rows;
+      tipList.replaceChildren(
+        ...events.slice(-10).reverse().map((e) => tipRow(e.args))
+      );
     } catch (err) {
-      tipList.innerHTML = `<p class="hint">Couldn't load recent tips right now — your page still works, this is just the activity list.</p>`;
+      tipList.replaceChildren(
+        hintNode(
+          "Couldn't load recent tips right now — your page still works, this is just the activity list."
+        )
+      );
     }
+  }
+
+  // The tip message is written by whoever sent the tip, and the contract puts no
+  // limit on its length or contents. Build this row as DOM nodes with textContent
+  // rather than an HTML string: a message like `<img src=x onerror=...>` would
+  // otherwise execute right here, on the one page where the creator's wallet is
+  // connected. The length cap keeps a very long message from wrecking the layout.
+  const MAX_MESSAGE_CHARS = 140;
+
+  function tipRow({ sender, amount, message }) {
+    const row = document.createElement("div");
+    row.className = "tip-row";
+
+    const who = document.createElement("span");
+    who.className = "who";
+    const note = message.length > MAX_MESSAGE_CHARS
+      ? `${message.slice(0, MAX_MESSAGE_CHARS)}…`
+      : message;
+    who.textContent = note ? `${shortAddress(sender)} — "${note}"` : shortAddress(sender);
+
+    const amt = document.createElement("span");
+    amt.className = "amt";
+    amt.textContent = `${ethers.formatEther(amount)} USDC`;
+
+    row.append(who, amt);
+    return row;
   }
 
   async function refreshState() {
