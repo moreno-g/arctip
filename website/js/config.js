@@ -4,9 +4,10 @@ const ARC_TESTNET = {
   chainId: 5042002,
   chainName: "Arc Testnet",
   nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
-  // The public Arc RPC rate-limits quickly under modest traffic — a second
-  // gateway is listed as a fallback so the site keeps working when it does.
-  rpcUrls: ["https://rpc.testnet.arc.network", "https://5042002.rpc.thirdweb.com"],
+  // thirdweb's gateway first: the official Arc RPC rate-limits quickly under
+  // modest traffic, and this order is also what wallets use for gas estimation
+  // when they first add the network — not just our own fallback logic.
+  rpcUrls: ["https://5042002.rpc.thirdweb.com", "https://rpc.testnet.arc.network"],
   blockExplorerUrls: ["https://testnet.arcscan.app"],
 };
 
