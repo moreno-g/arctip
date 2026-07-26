@@ -59,7 +59,7 @@
       <h2>2. Claim your handle</h2>
       <p class="hint">This is the name in your tip link — arctip.xyz/@<em>you</em>. Choose carefully.</p>
       <div class="field">
-        <label>Handle</label>
+        <label for="handleInput">Handle</label>
         <div class="field-row">
           <span class="prefix">@</span>
           <input type="text" id="handleInput" placeholder="yourname" maxlength="32" autocomplete="off" />
@@ -74,7 +74,7 @@
       <p class="hint">Share this link in your bio, stream overlay, or wherever fans find you.</p>
       <div class="copy-row">
         <div class="field-row">
-          <input type="text" id="tipLinkInput" readonly />
+          <input type="text" id="tipLinkInput" readonly aria-label="Your tip link" />
         </div>
         <button class="btn btn-outline" id="copyLinkBtn" type="button">Copy</button>
       </div>

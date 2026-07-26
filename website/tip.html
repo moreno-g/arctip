@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Send a tip on ArcTip</title>
-  <meta name="description" content="Send a USDC tip, settled on Arc in one to two seconds." />
+  <meta name="description" content="Send a USDC tip — it lands in about a second, on Arc." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314264A'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' fill='%23C9832A' text-anchor='middle'%3E%24%3C/text%3E%3C/svg%3E" />
 
   <!-- Static card: crawlers don't run JS, so the handle can't be filled in here.
@@ -58,12 +58,12 @@
         <button class="amount-btn" data-amount="custom" type="button">Custom</button>
       </div>
       <div class="field" id="customAmountField" style="display:none;">
-        <label>Custom amount (USDC)</label>
+        <label for="customAmountInput">Custom amount (USDC)</label>
         <input type="number" id="customAmountInput" min="0" step="0.01" placeholder="0.00" />
       </div>
 
       <div class="field">
-        <label>Message (optional, public)</label>
+        <label for="messageInput">Message (optional, public)</label>
         <textarea id="messageInput" maxlength="140" placeholder="Say something nice…"></textarea>
       </div>
 
