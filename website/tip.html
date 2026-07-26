@@ -44,6 +44,12 @@
     </div>
 
     <div class="card" id="tipCard" style="display:none;">
+      <div class="payee">
+        <span class="payee-label">Paying</span>
+        <span class="payee-addr" id="recipientAddress"></span>
+        <a class="payee-link" id="recipientExplorer" target="_blank" rel="noopener">Verify on ArcScan</a>
+      </div>
+
       <h2>Amount</h2>
       <div class="amount-grid">
         <button class="amount-btn" data-amount="1" type="button">1 USDC</button>
@@ -74,6 +80,7 @@
         <div class="tx-row"><span class="k">Status</span><span class="v" style="color:#2E7D4F;">Settled</span></div>
       </div>
       <a class="btn btn-outline btn-block" id="receiptExplorerLink" href="#" target="_blank" rel="noopener">View on ArcScan</a>
+      <button class="btn btn-primary btn-block" id="sendAnotherBtn" type="button">Send another tip</button>
     </div>
   </main>
 

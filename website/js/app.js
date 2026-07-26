@@ -252,7 +252,12 @@
   }
 
   async function refreshState() {
-    walletChip.innerHTML = `<span class="wallet-chip"><span class="dot"></span>${shortAddress(state.address)}</span>`;
+    const chip = document.createElement("span");
+    chip.className = "wallet-chip";
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    chip.append(dot, document.createTextNode(shortAddress(state.address)));
+    walletChip.replaceChildren(chip);
     connectCard.style.display = "none";
 
     const handle = await findOwnHandle(state.address);
@@ -309,8 +314,10 @@
         return;
       }
 
+      // Re-verify the chain rather than trusting the switch made at connect time.
       claimBtn.innerHTML = `<span class="spinner"></span> Confirm in your wallet…`;
-      const tx = await state.writeContract.register(handle);
+      const { contract } = await getVerifiedWriteContract();
+      const tx = await contract.register(handle);
       claimBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
       await tx.wait();
 
@@ -412,4 +419,6 @@
     showMsg(copyMsg, "Link copied.", "success");
     setTimeout(() => showMsg(copyMsg, "", ""), 2000);
   });
+
+  watchWalletChanges();
 })();

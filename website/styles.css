@@ -463,7 +463,17 @@ a:focus-visible, button:focus-visible {
   .step p { grid-column: 2; }
 }
 @media (max-width: 640px) {
-  .nav-links { display: none; }
+  /* Don't drop the nav on mobile — wrap it under the brand instead, so the
+     sections stay reachable without building a hamburger menu for three links. */
+  .nav .wrap { height: auto; flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; row-gap: 10px; }
+  .nav-links {
+    order: 3;
+    width: 100%;
+    gap: 20px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .nav-links a { font-size: 0.86rem; }
   .spec-strip { grid-template-columns: 1fr 1fr; }
 }
 
@@ -628,6 +638,32 @@ a:focus-visible, button:focus-visible {
   border: 1px solid var(--line);
   border-radius: 10px;
 }
+/* Who actually receives the money, shown before the fan signs anything */
+.payee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.payee-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--slate-400);
+}
+.payee-addr {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  word-break: break-all;
+}
+.payee-link { font-size: 0.8rem; color: var(--slate-400); text-decoration: underline; }
+.payee-link:hover { color: var(--ink); }
+
 .share-note { margin-top: 14px; }
 .share-actions {
   margin-top: 14px;

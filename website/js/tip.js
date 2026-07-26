@@ -26,10 +26,18 @@
   const receiptHandle = document.getElementById("receiptHandle");
   const receiptAmount = document.getElementById("receiptAmount");
   const receiptExplorerLink = document.getElementById("receiptExplorerLink");
+  const recipientAddress = document.getElementById("recipientAddress");
+  const recipientExplorer = document.getElementById("recipientExplorer");
+  const sendAnotherBtn = document.getElementById("sendAnotherBtn");
 
   const readContractPromise = getReadOnlyContract();
+  let state = { signer: null, address: null };
+
+  // Kept as the raw string the user typed. Going through Number() and back turns
+  // 0.0000001 into "1e-7", which parseEther rejects outright, and silently
+  // rounds anything past float precision.
   let selectedAmount = null;
-  let state = { signer: null, address: null, writeContract: null };
+  const AMOUNT_RE = /^\d{1,12}(\.\d{1,18})?$/;
 
   // Text as text — the strings here include wallet/RPC errors, which can carry
   // attacker-influenced contract data.
@@ -52,20 +60,21 @@
         customInput.focus();
       } else {
         customField.style.display = "none";
-        selectedAmount = Number(btn.dataset.amount);
+        selectedAmount = btn.dataset.amount;
       }
     });
   });
 
   customInput.addEventListener("input", () => {
-    const v = Number(customInput.value);
-    selectedAmount = v > 0 ? v : null;
+    const raw = customInput.value.trim();
+    selectedAmount = AMOUNT_RE.test(raw) && Number(raw) > 0 ? raw : null;
   });
 
   async function init() {
     if (!handle) {
-      handleTitle.textContent = "No handle specified";
-      handleLead.textContent = "This link is missing a ?handle= — ask the creator for their ArcTip link.";
+      handleTitle.textContent = "No handle in this link";
+      handleLead.textContent =
+        "An ArcTip link looks like arctip.xyz/@name — ask the creator for theirs.";
       return;
     }
 
@@ -80,7 +89,13 @@
       }
 
       handleTitle.textContent = `Tip @${handle}`;
-      handleLead.textContent = `Sent as USDC, settled on Arc in one to two seconds.`;
+      handleLead.textContent = "Sent as USDC, and it lands in about a second.";
+
+      // Show who actually gets paid. This is a payments page: nobody should have
+      // to take our word for where their money is going.
+      recipientAddress.textContent = owner;
+      recipientExplorer.href = `${ARC_TESTNET.blockExplorerUrls[0]}/address/${owner}`;
+
       tipCard.style.display = "block";
     } catch (err) {
       handleTitle.textContent = `@${handle}`;
@@ -93,8 +108,8 @@
   sendBtn.addEventListener("click", async () => {
     showMsg("", "");
 
-    if (!selectedAmount || selectedAmount <= 0) {
-      showMsg("Pick an amount first.", "error");
+    if (!selectedAmount) {
+      showMsg("Pick an amount first, or enter a valid number.", "error");
       return;
     }
 
@@ -105,14 +120,16 @@
         const { signer, address } = await connectWallet();
         state.signer = signer;
         state.address = address;
-        state.writeContract = getWriteContract(signer);
-        walletChip.innerHTML = `<span class="wallet-chip"><span class="dot"></span>${shortAddress(address)}</span>`;
+        walletChip.replaceChildren(walletChipNode(address));
       }
 
+      // Re-verify the chain here rather than trusting the switch made at connect
+      // time: sending value to this address on the wrong chain destroys it.
       sendBtn.innerHTML = `<span class="spinner"></span> Confirm in your wallet…`;
-      const value = ethers.parseEther(String(selectedAmount));
-      const message = messageInput.value.trim();
-      const tx = await state.writeContract.tip(handle, message, { value });
+      const { contract } = await getVerifiedWriteContract();
+
+      const value = ethers.parseEther(selectedAmount);
+      const tx = await contract.tip(handle, messageInput.value.trim(), { value });
 
       sendBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
       const receipt = await tx.wait();
@@ -130,5 +147,26 @@
     }
   });
 
+  sendAnotherBtn.addEventListener("click", () => {
+    receiptCard.style.display = "none";
+    tipCard.style.display = "block";
+    amountBtns.forEach((b) => b.classList.remove("is-active"));
+    customField.style.display = "none";
+    customInput.value = "";
+    messageInput.value = "";
+    selectedAmount = null;
+    showMsg("", "");
+  });
+
+  function walletChipNode(address) {
+    const chip = document.createElement("span");
+    chip.className = "wallet-chip";
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    chip.append(dot, document.createTextNode(shortAddress(address)));
+    return chip;
+  }
+
+  watchWalletChanges();
   init();
 })();

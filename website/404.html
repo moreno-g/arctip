@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Not found — ArcTip</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314264A'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' fill='%23C9832A' text-anchor='middle'%3E%24%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="/">
+        <span class="brand-arc">ARC</span><span class="brand-sep">/</span><span class="brand-tip">Tip</span>
+      </a>
+      <a class="btn btn-primary" href="/app">Launch app</a>
+    </div>
+  </nav>
+
+  <main class="app-shell">
+    <span class="eyebrow">404</span>
+    <h1>Nothing at this address</h1>
+    <p class="lead">A tip link looks like <strong>arctip.xyz/@name</strong>. If you typed one by hand, it's worth checking the spelling — handles are lowercase letters, numbers and underscores.</p>
+
+    <div class="card">
+      <h2>Looking for someone's tip page?</h2>
+      <p class="hint">Enter their handle and we'll take you there.</p>
+      <div class="field">
+        <div class="field-row">
+          <span class="prefix">@</span>
+          <input type="text" id="handleLookup" placeholder="name" autocomplete="off" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block" id="goBtn" type="button">Go to their page</button>
+    </div>
+
+    <div class="card">
+      <h2>Or claim your own</h2>
+      <p class="hint">Pick a handle, share one link, get paid in USDC on Arc.</p>
+      <a class="btn btn-outline btn-block" href="/app">Launch the app</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <span class="fine">ArcTip is an independent project built on Arc — not affiliated with Circle. Arc is currently on testnet.</span>
+      <div class="social">
+        <a href="https://x.com/Arctipxyz" target="_blank" rel="noopener">X / Twitter</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (() => {
+      const input = document.getElementById("handleLookup");
+      const go = () => {
+        const h = input.value.trim().toLowerCase().replace(/^@/, "");
+        if (h) window.location.href = `/@${encodeURIComponent(h)}`;
+      };
+      document.getElementById("goBtn").addEventListener("click", go);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") go();
+      });
+    })();
+  </script>
+</body>
+</html>
