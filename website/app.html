@@ -85,9 +85,13 @@
 
       <div class="share-asset">
         <canvas id="shareCardCanvas" role="img" aria-label="Shareable card showing your handle and QR code"></canvas>
-        <div class="share-asset-row">
-          <span class="hint">Post this when you announce your page — 1200×630, sized for X, Discord and Telegram.</span>
-          <button class="btn btn-outline" id="downloadCardBtn" type="button">Download card</button>
+        <p class="hint share-note">Post this when you announce your page — 1200×630, sized for X, Discord and Telegram.</p>
+        <div class="share-actions">
+          <button class="btn btn-primary" id="shareCardBtn" type="button" hidden>Share…</button>
+          <button class="btn btn-outline" id="copyCardBtn" type="button" hidden>Copy image</button>
+          <a class="btn btn-outline" id="shareXLink" target="_blank" rel="noopener">Post on X</a>
+          <a class="btn btn-outline" id="shareTgLink" target="_blank" rel="noopener">Telegram</a>
+          <button class="btn btn-outline" id="downloadCardBtn" type="button">Download</button>
         </div>
         <div id="cardMsg"></div>
       </div>

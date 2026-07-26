@@ -20,6 +20,10 @@
   const shareCardCanvas = document.getElementById("shareCardCanvas");
   const downloadCardBtn = document.getElementById("downloadCardBtn");
   const cardMsg = document.getElementById("cardMsg");
+  const shareCardBtn = document.getElementById("shareCardBtn");
+  const copyCardBtn = document.getElementById("copyCardBtn");
+  const shareXLink = document.getElementById("shareXLink");
+  const shareTgLink = document.getElementById("shareTgLink");
 
   let state = { signer: null, address: null, writeContract: null };
   const readContractPromise = getReadOnlyContract();
@@ -260,6 +264,7 @@
       state.handle = handle;
       drawQr(qrCanvas, link, 200);
       drawShareCard(shareCardCanvas, handle, link);
+      await setUpShareActions(link);
       await loadRecentTips(state.address);
     } else {
       claimCard.style.display = "block";
@@ -316,6 +321,65 @@
     } finally {
       claimBtn.disabled = false;
       claimBtn.textContent = "Claim handle";
+    }
+  });
+
+  // Sharing an image is split in two because no platform lets a link pre-attach a
+  // file: X, Telegram and Discord intent URLs carry text and a URL, nothing more.
+  // So the image travels either through the OS share sheet (mobile) or the
+  // clipboard (desktop), while the intent links fall back to text + the tip link,
+  // which still renders a preview card thanks to the page's Open Graph tags.
+  const SHARE_TEXT = "You can now tip me in USDC — it lands in about a second, no account needed.";
+
+  function cardBlob() {
+    return new Promise((resolve) => shareCardCanvas.toBlob(resolve, "image/png"));
+  }
+
+  async function canShareCardFile() {
+    if (!navigator.canShare) return false;
+    try {
+      const probe = new File([new Blob([""], { type: "image/png" })], "probe.png", {
+        type: "image/png",
+      });
+      return navigator.canShare({ files: [probe] });
+    } catch {
+      return false;
+    }
+  }
+
+  async function setUpShareActions(link) {
+    const q = (s) => encodeURIComponent(s);
+    shareXLink.href = `https://twitter.com/intent/tweet?text=${q(SHARE_TEXT)}&url=${q(link)}`;
+    shareTgLink.href = `https://t.me/share/url?url=${q(link)}&text=${q(SHARE_TEXT)}`;
+
+    shareCardBtn.hidden = !(await canShareCardFile());
+    copyCardBtn.hidden = !(navigator.clipboard && window.ClipboardItem);
+  }
+
+  shareCardBtn.addEventListener("click", async () => {
+    try {
+      const blob = await cardBlob();
+      const file = new File([blob], `arctip-${state.handle || "card"}.png`, {
+        type: "image/png",
+      });
+      await navigator.share({
+        files: [file],
+        text: `${SHARE_TEXT} ${tipLinkInput.value}`,
+      });
+    } catch (err) {
+      if (err.name === "AbortError") return; // user dismissed the sheet
+      showMsg(cardMsg, "Couldn't open the share sheet — use Copy image or Download instead.", "error");
+    }
+  });
+
+  copyCardBtn.addEventListener("click", async () => {
+    try {
+      const blob = await cardBlob();
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      showMsg(cardMsg, "Image copied — paste it straight into a post.", "success");
+      setTimeout(() => showMsg(cardMsg, "", ""), 3000);
+    } catch (err) {
+      showMsg(cardMsg, "Your browser blocked the copy — use Download instead.", "error");
     }
   });
 

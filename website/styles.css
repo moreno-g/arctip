@@ -628,18 +628,18 @@ a:focus-visible, button:focus-visible {
   border: 1px solid var(--line);
   border-radius: 10px;
 }
-.share-asset-row {
+.share-note { margin-top: 14px; }
+.share-actions {
   margin-top: 14px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
-.share-asset-row .hint { margin: 0; flex: 1; }
-.share-asset-row .btn { flex: none; }
+.share-actions .btn { flex: none; }
+.share-actions .btn[hidden] { display: none; }
 
 @media (max-width: 520px) {
-  .share-asset-row { flex-direction: column; align-items: stretch; }
+  .share-actions .btn { flex: 1 1 auto; justify-content: center; }
 }
 
 .qr-block {
