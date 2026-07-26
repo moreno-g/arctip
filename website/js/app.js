@@ -17,6 +17,9 @@
   const qrCanvas = document.getElementById("qrCanvas");
   const downloadQrBtn = document.getElementById("downloadQrBtn");
   const qrMsg = document.getElementById("qrMsg");
+  const shareCardCanvas = document.getElementById("shareCardCanvas");
+  const downloadCardBtn = document.getElementById("downloadCardBtn");
+  const cardMsg = document.getElementById("cardMsg");
 
   let state = { signer: null, address: null, writeContract: null };
   const readContractPromise = getReadOnlyContract();
@@ -147,6 +150,103 @@
     return row;
   }
 
+  // A share card the creator can post as-is. Drawn at a fixed 1200x630 and then
+  // scaled by CSS, so the download is full quality regardless of preview size.
+  const CARD_W = 1200;
+  const CARD_H = 630;
+  const TEXT_COLUMN = 620; // width available left of the QR plate
+
+  function drawShareCard(canvas, handle, link) {
+    canvas.width = CARD_W;
+    canvas.height = CARD_H;
+    const x = canvas.getContext("2d");
+
+    x.fillStyle = "#14264A";
+    x.fillRect(0, 0, CARD_W, CARD_H);
+
+    // the brand arc, bleeding off the right edge behind the QR
+    x.save();
+    x.globalAlpha = 0.4;
+    x.strokeStyle = "#C9832A";
+    x.lineWidth = 18;
+    x.lineCap = "round";
+    x.beginPath();
+    x.arc(1180, 315, 300, Math.PI * 0.68, Math.PI * 1.32);
+    x.stroke();
+    x.restore();
+
+    const rule = x.createLinearGradient(0, 0, CARD_W, 0);
+    rule.addColorStop(0, "#C9832A");
+    rule.addColorStop(0.22, "#C9832A");
+    rule.addColorStop(1, "rgba(201,131,42,0)");
+    x.fillStyle = rule;
+    x.fillRect(0, 0, CARD_W, 6);
+
+    const L = 80;
+    x.textBaseline = "alphabetic";
+    x.textAlign = "left";
+
+    x.font = '20px "Space Mono", monospace';
+    x.letterSpacing = "2.6px";
+    x.fillStyle = "#C9832A";
+    x.fillText("{ TIP ME IN USDC }", L, 120);
+    x.letterSpacing = "0px";
+
+    // the handle is the point of the card, so let it fill the space available
+    let size = 92;
+    x.letterSpacing = "-1.5px";
+    while (size > 34) {
+      x.font = `400 ${size}px "Space Grotesk", sans-serif`;
+      if (x.measureText("@" + handle).width <= TEXT_COLUMN) break;
+      size -= 2;
+    }
+    x.font = `400 ${size}px "Space Grotesk", sans-serif`;
+    x.fillStyle = "#ffffff";
+    x.fillText("@" + handle, L, 235);
+    x.letterSpacing = "0px";
+
+    x.font = '26px "DM Sans", sans-serif';
+    x.fillStyle = "#B9C3D6";
+    x.fillText("Send me a tip in USDC — it lands in about a second,", L, 300);
+    x.fillText("no account and no address to copy.", L, 338);
+
+    x.fillStyle = "rgba(255,255,255,.16)";
+    x.fillRect(L, 400, TEXT_COLUMN, 1);
+
+    // Fit the URL too, not just the handle: a long handle used to run the URL
+    // straight under the QR plate.
+    const shown = link.replace(/^https?:\/\//, "");
+    let urlSize = 30;
+    while (urlSize > 14) {
+      x.font = `${urlSize}px "Space Mono", monospace`;
+      if (x.measureText(shown).width <= TEXT_COLUMN) break;
+      urlSize -= 1;
+    }
+    x.font = `${urlSize}px "Space Mono", monospace`;
+    x.fillStyle = "#ffffff";
+    x.fillText(shown, L, 452);
+
+    x.font = '19px "Space Mono", monospace';
+    x.letterSpacing = "1.5px";
+    x.fillStyle = "#7E8CA8";
+    x.fillText("POWERED BY ARCTIP  ·  BUILT ON ARC", L, 520);
+    x.letterSpacing = "0px";
+
+    // QR on a white plate so it stays scannable against the navy
+    const plate = 300;
+    const px = CARD_W - plate - 80;
+    const py = (CARD_H - plate) / 2;
+    x.fillStyle = "#ffffff";
+    x.beginPath();
+    x.roundRect(px, py, plate, plate, 16);
+    x.fill();
+
+    const qr = drawQr(document.createElement("canvas"), link, plate - 24);
+    x.drawImage(qr, px + (plate - qr.width) / 2, py + (plate - qr.height) / 2);
+
+    return canvas;
+  }
+
   async function refreshState() {
     walletChip.innerHTML = `<span class="wallet-chip"><span class="dot"></span>${shortAddress(state.address)}</span>`;
     connectCard.style.display = "none";
@@ -159,6 +259,7 @@
       tipLinkInput.value = link;
       state.handle = handle;
       drawQr(qrCanvas, link, 200);
+      drawShareCard(shareCardCanvas, handle, link);
       await loadRecentTips(state.address);
     } else {
       claimCard.style.display = "block";
@@ -218,20 +319,28 @@
     }
   });
 
+  function downloadCanvas(canvas, filename, msgEl) {
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+      showMsg(msgEl, "Saved.", "success");
+      setTimeout(() => showMsg(msgEl, "", ""), 2000);
+    }, "image/png");
+  }
+
+  downloadCardBtn.addEventListener("click", () => {
+    downloadCanvas(shareCardCanvas, `arctip-card-${state.handle || "share"}.png`, cardMsg);
+  });
+
   downloadQrBtn.addEventListener("click", () => {
     // Redraw large: the on-screen canvas is ~200px, which looks blocky on a
     // stream overlay or in print.
     const big = drawQr(document.createElement("canvas"), tipLinkInput.value, 1024);
-    big.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `arctip-${state.handle || "qr"}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showMsg(qrMsg, "Saved.", "success");
-      setTimeout(() => showMsg(qrMsg, "", ""), 2000);
-    }, "image/png");
+    downloadCanvas(big, `arctip-qr-${state.handle || "qr"}.png`, qrMsg);
   });
 
   copyLinkBtn.addEventListener("click", async () => {

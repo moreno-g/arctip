@@ -80,11 +80,23 @@
       </div>
       <div id="copyMsg"></div>
 
+      <h2 class="share-heading">Share</h2>
+      <p class="hint">Two ready-made assets, generated from your handle.</p>
+
+      <div class="share-asset">
+        <canvas id="shareCardCanvas" role="img" aria-label="Shareable card showing your handle and QR code"></canvas>
+        <div class="share-asset-row">
+          <span class="hint">Post this when you announce your page — 1200×630, sized for X, Discord and Telegram.</span>
+          <button class="btn btn-outline" id="downloadCardBtn" type="button">Download card</button>
+        </div>
+        <div id="cardMsg"></div>
+      </div>
+
       <div class="qr-block">
         <canvas id="qrCanvas" role="img" aria-label="QR code linking to your tip page"></canvas>
         <div class="qr-side">
-          <p class="hint">Fans can scan this instead of typing the link — put it on a stream overlay, a slide, or a printed card.</p>
-          <button class="btn btn-outline" id="downloadQrBtn" type="button">Download PNG</button>
+          <p class="hint">Just the QR, on its own — for a stream overlay, a slide, or a printed card.</p>
+          <button class="btn btn-outline" id="downloadQrBtn" type="button">Download QR</button>
           <div id="qrMsg"></div>
         </div>
       </div>
