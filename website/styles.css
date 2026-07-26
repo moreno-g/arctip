@@ -615,6 +615,30 @@ a:focus-visible, button:focus-visible {
 .copy-row .field-row { flex: 1; }
 .copy-row input { font-family: var(--font-mono); font-size: 0.85rem; color: var(--slate-600); }
 
+.qr-block {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.qr-block canvas {
+  width: 132px;
+  height: 132px;
+  flex: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  /* keep the modules crisp when the canvas is scaled down for display */
+  image-rendering: pixelated;
+}
+.qr-side { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.qr-side .hint { margin: 0; }
+
+@media (max-width: 520px) {
+  .qr-block { flex-direction: column; align-items: flex-start; }
+}
+
 .tip-list { margin-top: 14px; display: flex; flex-direction: column; }
 .tip-row {
   display: flex;

@@ -14,6 +14,9 @@
   const copyMsg = document.getElementById("copyMsg");
   const tipList = document.getElementById("tipList");
   const walletChip = document.getElementById("walletChip");
+  const qrCanvas = document.getElementById("qrCanvas");
+  const downloadQrBtn = document.getElementById("downloadQrBtn");
+  const qrMsg = document.getElementById("qrMsg");
 
   let state = { signer: null, address: null, writeContract: null };
   const readContractPromise = getReadOnlyContract();
@@ -40,6 +43,37 @@
   // a bio or under a stream. /@handle is served by a rewrite (see vercel.json).
   function tipLinkFor(handle) {
     return `${window.location.origin}/@${handle}`;
+  }
+
+  // QR is generated locally rather than through an image API: a creator's handle
+  // is their identity here, and it has no business being sent to a third party
+  // just to draw a square.
+  const QR_QUIET_ZONE = 4; // modules of margin — scanners fail without it
+
+  function drawQr(canvas, text, targetPx) {
+    const qr = qrcode(0, "M");
+    qr.addData(text);
+    qr.make();
+
+    const count = qr.getModuleCount();
+    const total = count + QR_QUIET_ZONE * 2;
+    const scale = Math.max(1, Math.floor(targetPx / total));
+    const dim = scale * total;
+
+    canvas.width = dim;
+    canvas.height = dim;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, dim, dim);
+    ctx.fillStyle = "#14264A";
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (qr.isDark(r, c)) {
+          ctx.fillRect((c + QR_QUIET_ZONE) * scale, (r + QR_QUIET_ZONE) * scale, scale, scale);
+        }
+      }
+    }
+    return canvas;
   }
 
   async function findOwnHandle(address) {
@@ -121,7 +155,10 @@
     if (handle) {
       claimCard.style.display = "none";
       dashboardCard.style.display = "block";
-      tipLinkInput.value = tipLinkFor(handle);
+      const link = tipLinkFor(handle);
+      tipLinkInput.value = link;
+      state.handle = handle;
+      drawQr(qrCanvas, link, 200);
       await loadRecentTips(state.address);
     } else {
       claimCard.style.display = "block";
@@ -179,6 +216,22 @@
       claimBtn.disabled = false;
       claimBtn.textContent = "Claim handle";
     }
+  });
+
+  downloadQrBtn.addEventListener("click", () => {
+    // Redraw large: the on-screen canvas is ~200px, which looks blocky on a
+    // stream overlay or in print.
+    const big = drawQr(document.createElement("canvas"), tipLinkInput.value, 1024);
+    big.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `arctip-${state.handle || "qr"}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showMsg(qrMsg, "Saved.", "success");
+      setTimeout(() => showMsg(qrMsg, "", ""), 2000);
+    }, "image/png");
   });
 
   copyLinkBtn.addEventListener("click", async () => {

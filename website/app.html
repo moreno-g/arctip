@@ -80,6 +80,15 @@
       </div>
       <div id="copyMsg"></div>
 
+      <div class="qr-block">
+        <canvas id="qrCanvas" role="img" aria-label="QR code linking to your tip page"></canvas>
+        <div class="qr-side">
+          <p class="hint">Fans can scan this instead of typing the link — put it on a stream overlay, a slide, or a printed card.</p>
+          <button class="btn btn-outline" id="downloadQrBtn" type="button">Download PNG</button>
+          <div id="qrMsg"></div>
+        </div>
+      </div>
+
       <h2 style="margin-top:28px;">Recent tips</h2>
       <div class="tip-list" id="tipList">
         <p class="hint">No tips yet — they'll show up here as they arrive.</p>
@@ -97,6 +106,7 @@
   </footer>
 
   <script src="vendor/ethers.umd.min.js"></script>
+  <script src="vendor/qrcode.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/app.js"></script>
