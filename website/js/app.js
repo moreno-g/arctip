@@ -25,7 +25,9 @@
   const shareXLink = document.getElementById("shareXLink");
   const shareTgLink = document.getElementById("shareTgLink");
 
-  let state = { signer: null, address: null, writeContract: null };
+  // Transactions build their own contract via getVerifiedWriteContract, which
+  // re-checks the chain each time, so nothing is cached from connect time here.
+  let state = { signer: null, address: null, handle: null };
   const readContractPromise = getReadOnlyContract();
 
   // Always render text as text: several call sites pass wallet/RPC error strings,
@@ -285,7 +287,6 @@
       const { signer, address } = await connectWallet();
       state.signer = signer;
       state.address = address;
-      state.writeContract = getWriteContract(signer);
       await refreshState();
     } catch (err) {
       showMsg(connectMsg, err.message || "Could not connect wallet.", "error");
