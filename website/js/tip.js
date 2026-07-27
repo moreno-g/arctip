@@ -31,7 +31,10 @@
   const sendAnotherBtn = document.getElementById("sendAnotherBtn");
 
   const readContractPromise = getReadOnlyContract();
-  let state = { signer: null, address: null };
+  // The fee read when the page loaded. It is sent with the tip as the highest
+  // fee the sender agrees to, so if it is raised between now and the wallet
+  // prompt the transaction reverts instead of quietly overcharging.
+  let state = { signer: null, address: null, quotedFeeBps: null };
 
   // Kept as the raw string the user typed. Going through Number() and back turns
   // 0.0000001 into "1e-7", which parseEther rejects outright, and silently
@@ -88,6 +91,8 @@
         return;
       }
 
+      state.quotedFeeBps = await readContract.feeBps();
+
       handleTitle.textContent = `Tip @${handle}`;
       handleLead.textContent = "Sent as USDC, and it lands in about a second.";
 
@@ -129,7 +134,12 @@
       const { contract } = await getVerifiedWriteContract();
 
       const value = ethers.parseEther(selectedAmount);
-      const tx = await contract.tip(handle, messageInput.value.trim(), { value });
+      const tx = await contract.tip(
+        handle,
+        messageInput.value.trim(),
+        state.quotedFeeBps ?? 200,
+        { value }
+      );
 
       sendBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
       const receipt = await tx.wait();

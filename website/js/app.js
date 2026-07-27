@@ -130,12 +130,12 @@
     }
   }
 
-  // The tip message is written by whoever sent the tip, and the contract puts no
-  // limit on its length or contents. Build this row as DOM nodes with textContent
-  // rather than an HTML string: a message like `<img src=x onerror=...>` would
-  // otherwise execute right here, on the one page where the creator's wallet is
-  // connected. The length cap keeps a very long message from wrecking the layout.
-  const MAX_MESSAGE_CHARS = 140;
+  // The tip message is written by whoever sent the tip. Build this row as DOM
+  // nodes with textContent rather than an HTML string: a message like
+  // `<img src=x onerror=...>` would otherwise execute right here, on the one page
+  // where the creator's wallet is connected. The contract caps length now, but
+  // the truncation stays as a second line of defence against a future change.
+  const MAX_MESSAGE_CHARS = 280; // matches MAX_MESSAGE_LENGTH in the contract
 
   function tipRow({ sender, amount, message }) {
     const row = document.createElement("div");

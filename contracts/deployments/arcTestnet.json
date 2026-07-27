@@ -4,11 +4,13 @@
   "rpcUrl": "https://rpc.testnet.arc.network",
   "blockExplorer": "https://testnet.arcscan.app",
   "contract": "TipJar",
-  "address": "0xb2f2DB422756b139E0627744176b137E23FdA30a",
+  "version": 2,
+  "address": "0x9BE91953aE20c079F8Ad932Ef6CF812f80aD217a",
   "deployer": "0x5c32a3A5DbaEEB9f35D47586be1dbc7D05dA96be",
   "treasury": "0x7De8aa2aDDa8D9A5565e75C5B89C7836c3Cb8e1f",
+  "owner": "0x7De8aa2aDDa8D9A5565e75C5B89C7836c3Cb8e1f",
   "feeBps": 200,
   "deployedAt": "2026-07-25",
-  "notes": "Redeployed to add ownerHandle(address) reverse lookup. Treasury later pointed at the project wallet; ownership still held by the throwaway deployer key and must move before mainnet.",
-  "owner": "0x5c32a3A5DbaEEB9f35D47586be1dbc7D05dA96be"
+  "supersedes": "0xb2f2DB422756b139E0627744176b137E23FdA30a",
+  "notes": "v2: owner and treasury set at construction so the deployer key never held admin rights. Adds maxFeeBps slippage guard, on-chain handle validation, one handle per address, transferHandle, a pending-withdrawal fallback so a rejecting recipient cannot brick tips, a 280-char message cap, and readable handle/tip/volume counters. Known accepted risk: register() is front-runnable."
 }

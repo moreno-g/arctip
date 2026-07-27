@@ -1,0 +1,16 @@
+node_modules/
+.env
+.DS_Store
+
+# Hardhat
+contracts/cache/
+contracts/artifacts/
+contracts/coverage/
+contracts/coverage.json
+contracts/typechain-types/
+
+# Vercel
+website/.vercel
+
+# stray screenshots dropped into the repo root
+image-*.png
