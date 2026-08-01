@@ -1,0 +1,29 @@
+# ═══════════════════════════════════════════════════════════
+#  Config gitleaks pour token
+# ═══════════════════════════════════════════════════════════
+
+[extend]
+# Repart du jeu de règles complet, on ne fait qu'ajouter des exceptions.
+useDefault = true
+
+[allowlist]
+description = "Librairies tierces vendorées"
+
+# ethers.umd.min.js fait 500 Ko de JS minifié : des identifiants
+# mdanglés à forte entropie à chaque ligne. La règle generic-api-key
+# y mord systématiquement. C'est du code tiers non modifié, aucune
+# raison qu'un de NOS secrets s'y trouve.
+#
+# Volontairement limité à website/vendor/ : pas de règle générique
+# sur *.min.js, sinon un bundle applicatif contenant une vraie clé
+# passerait aussi à travers.
+paths = [
+    '''website/vendor/''',
+]
+
+# NOTE délibérée : contracts/.env n'est PAS allowlisté.
+# Il contient un vrai DEPLOYER_PRIVATE_KEY. Il est protégé par
+# contracts/.gitignore et n'a jamais été commité — c'est le bon
+# mécanisme. Le voir remonter dans un `gitleaks dir` est le
+# comportement souhaité : l'outil confirme qu'il y a bien un
+# secret là, et que git n'y touche pas.
