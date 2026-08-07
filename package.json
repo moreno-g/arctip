@@ -1,0 +1,10 @@
+{
+  "name": "arctip",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "cd contracts && npm test"
+  }
+}
