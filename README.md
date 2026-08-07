@@ -47,7 +47,7 @@ must be updated after any redeploy.
 
 ## Status
 
-Testnet. The `$TIP` token described on the site does not exist yet — the fee
-rebate, cashback and curation mechanics ship with Arc mainnet.
+Testnet. ArcTip is live on Arc Testnet using USDC for native value settlement.
 
 ArcTip is an independent project built on Arc. It is not affiliated with Circle.
+

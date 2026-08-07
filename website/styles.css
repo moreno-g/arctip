@@ -726,3 +726,139 @@ a:focus-visible, button:focus-visible {
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Circle & USDC Branding Badges */
+.circle-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(39, 117, 202, 0.08);
+  border: 1px solid rgba(39, 117, 202, 0.25);
+  color: #1A5FA4;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+}
+.circle-badge .usdc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2775CA;
+  box-shadow: 0 0 8px rgba(39, 117, 202, 0.5);
+}
+.on-navy .circle-badge {
+  background: rgba(39, 117, 202, 0.2);
+  border-color: rgba(39, 117, 202, 0.4);
+  color: #79B8FF;
+}
+
+/* CCTP Cross-Chain Grid */
+.cctp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-top: 32px;
+}
+.cctp-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.cctp-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold-500);
+}
+.cctp-card .cctp-icon {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+}
+.cctp-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.cctp-card p {
+  font-size: 0.88rem;
+  color: var(--slate-600);
+  line-height: 1.5;
+}
+
+/* Embeddable Widget Generator */
+.widget-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.snippet-box {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--navy-900);
+  color: #E2E8F0;
+  padding: 14px;
+  position: relative;
+  overflow-x: auto;
+}
+.snippet-box code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #93C5FD;
+}
+.snippet-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+/* Widget Embed Button Styling */
+.arctip-widget-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--navy-900);
+  color: var(--paper);
+  border: 1px solid var(--gold-500);
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(20, 38, 74, 0.15);
+}
+.arctip-widget-btn:hover {
+  background: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(20, 38, 74, 0.25);
+  color: var(--paper);
+}
+.arctip-widget-btn .symbol {
+  color: var(--gold-500);
+  font-weight: 700;
+}
+
+/* Circle Wallet Option Buttons */
+.wallet-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+.btn-circle-wallet {
+  background: linear-gradient(135deg, #1A5FA4 0%, #2775CA 100%);
+  color: white !important;
+  border: none;
+}
+.btn-circle-wallet:hover {
+  background: linear-gradient(135deg, #144E88 0%, #1F64AF 100%);
+}
+

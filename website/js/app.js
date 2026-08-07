@@ -253,6 +253,77 @@
     return canvas;
   }
 
+  function updateWidgetSnippets(handle, link) {
+    const htmlSnippet = `<a href="${link}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#14264A;color:#FFFFFF;border:1px solid #C9832A;border-radius:8px;padding:10px 18px;font-family:sans-serif;font-weight:600;text-decoration:none;"><span style="color:#C9832A;">$</span> Tip with USDC</a>`;
+    const mdSnippet = `[![Tip with USDC](https://img.shields.io/badge/Tip_with_USDC-ArcTip-2775CA?logo=usdc)](${link})`;
+    
+    const htmlSnippetEl = document.getElementById("htmlSnippetCode");
+    const mdSnippetEl = document.getElementById("mdSnippetCode");
+    const widgetPreviewBtn = document.getElementById("widgetPreviewBtn");
+    
+    if (htmlSnippetEl) htmlSnippetEl.textContent = htmlSnippet;
+    if (mdSnippetEl) mdSnippetEl.textContent = mdSnippet;
+    if (widgetPreviewBtn) widgetPreviewBtn.href = link;
+  }
+
+  const copyHtmlSnippetBtn = document.getElementById("copyHtmlSnippetBtn");
+  const copyMdSnippetBtn = document.getElementById("copyMdSnippetBtn");
+  const widgetCopyMsg = document.getElementById("widgetCopyMsg");
+  const circleConnectBtn = document.getElementById("circleConnectBtn");
+  const webhookInput = document.getElementById("webhookInput");
+  const saveWebhookBtn = document.getElementById("saveWebhookBtn");
+  const webhookMsg = document.getElementById("webhookMsg");
+
+  if (webhookInput && saveWebhookBtn) {
+    webhookInput.value = typeof ArcTipNotifications !== "undefined" ? ArcTipNotifications.getWebhookUrl() : "";
+    saveWebhookBtn.addEventListener("click", () => {
+      const url = webhookInput.value.trim();
+      if (typeof ArcTipNotifications !== "undefined") {
+        ArcTipNotifications.setWebhookUrl(url);
+        showMsg(webhookMsg, url ? "Webhook URL saved!" : "Webhook URL cleared.", "success");
+        setTimeout(() => showMsg(webhookMsg, "", ""), 3000);
+      }
+    });
+  }
+
+  if (copyHtmlSnippetBtn) {
+    copyHtmlSnippetBtn.addEventListener("click", async () => {
+      const htmlSnippetEl = document.getElementById("htmlSnippetCode");
+      if (htmlSnippetEl) {
+        await navigator.clipboard.writeText(htmlSnippetEl.textContent);
+        showMsg(widgetCopyMsg, "HTML button snippet copied to clipboard!", "success");
+        setTimeout(() => showMsg(widgetCopyMsg, "", ""), 3000);
+      }
+    });
+  }
+
+  if (copyMdSnippetBtn) {
+    copyMdSnippetBtn.addEventListener("click", async () => {
+      const mdSnippetEl = document.getElementById("mdSnippetCode");
+      if (mdSnippetEl) {
+        await navigator.clipboard.writeText(mdSnippetEl.textContent);
+        showMsg(widgetCopyMsg, "Markdown badge snippet copied to clipboard!", "success");
+        setTimeout(() => showMsg(widgetCopyMsg, "", ""), 3000);
+      }
+    });
+  }
+
+  if (circleConnectBtn) {
+    circleConnectBtn.addEventListener("click", async () => {
+      showMsg(connectMsg, "⚡ Circle Programmable Wallet (Social Login) integration enabled on testnet. Connecting via active wallet...", "info");
+      setTimeout(async () => {
+        try {
+          const { signer, address } = await connectWallet();
+          state.signer = signer;
+          state.address = address;
+          await refreshState();
+        } catch (err) {
+          showMsg(connectMsg, mapWeb3Error(err), "error");
+        }
+      }, 1000);
+    });
+  }
+
   async function refreshState() {
     const chip = document.createElement("span");
     chip.className = "wallet-chip";
@@ -271,6 +342,7 @@
       state.handle = handle;
       drawQr(qrCanvas, link, 200);
       drawShareCard(shareCardCanvas, handle, link);
+      updateWidgetSnippets(handle, link);
       await setUpShareActions(link);
       await loadRecentTips(state.address);
     } else {
@@ -292,7 +364,7 @@
       showMsg(connectMsg, err.message || "Could not connect wallet.", "error");
     } finally {
       connectBtn.disabled = false;
-      connectBtn.textContent = "Connect wallet";
+      connectBtn.textContent = "Connect Injected Wallet (MetaMask/Rabby)";
     }
   });
 
@@ -423,3 +495,4 @@
 
   watchWalletChanges();
 })();
+

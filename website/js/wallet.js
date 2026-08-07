@@ -1,30 +1,62 @@
-// Thin wrapper around window.ethereum + ethers.js for connecting a wallet,
-// keeping it on Arc, and getting a TipJar contract instance.
+// EIP-6963 Provider Discovery Store & Error Helper
+const eip6963Providers = new Map();
+
+if (typeof window !== "undefined") {
+  window.addEventListener("eip6963:announceProvider", (event) => {
+    const { info, provider } = event.detail;
+    eip6963Providers.set(info.rdns, { info, provider });
+  });
+  window.dispatchEvent(new Event("eip6963:requestProvider"));
+}
+
+function getActiveInjectedProvider() {
+  if (eip6963Providers.size > 0) {
+    const first = eip6963Providers.values().next().value;
+    return first.provider;
+  }
+  return window.ethereum || null;
+}
+
+function mapWeb3Error(err) {
+  if (!err) return "An unexpected error occurred.";
+  const code = err.code || (err.error && err.error.code);
+  const msg = err.message || "";
+  
+  if (code === 4001 || msg.includes("user rejected") || err.code === "ACTION_REJECTED") {
+    return "Transaction cancelled in wallet.";
+  }
+  if (code === -32603 || msg.includes("insufficient funds")) {
+    return "Insufficient USDC balance or gas in wallet for this transaction.";
+  }
+  if (err.shortMessage) return err.shortMessage;
+  return msg || "Transaction failed. Please try again.";
+}
 
 async function connectWallet() {
-  if (!window.ethereum) {
-    throw new Error("No wallet found. Install MetaMask or another injected wallet to continue.");
+  const ethereum = getActiveInjectedProvider();
+  if (!ethereum) {
+    throw new Error("No wallet found. Install MetaMask, Rabby, or use Circle Social Login to continue.");
   }
-  await window.ethereum.request({ method: "eth_requestAccounts" });
-  await ensureArcNetwork();
+  await ethereum.request({ method: "eth_requestAccounts" });
+  await ensureArcNetwork(ethereum);
 
-  const provider = new ethers.BrowserProvider(window.ethereum);
+  const provider = new ethers.BrowserProvider(ethereum);
   await assertArcNetwork(provider);
 
   const signer = await provider.getSigner();
   return { provider, signer, address: await signer.getAddress() };
 }
 
-async function ensureArcNetwork() {
+async function ensureArcNetwork(ethereum = getActiveInjectedProvider()) {
+  if (!ethereum) return;
   try {
-    await window.ethereum.request({
+    await ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: ARC_TESTNET.chainIdHex }],
     });
   } catch (switchError) {
-    // 4902 = chain not added to the wallet yet
     if (switchError.code === 4902) {
-      await window.ethereum.request({
+      await ethereum.request({
         method: "wallet_addEthereumChain",
         params: [
           {
@@ -42,10 +74,6 @@ async function ensureArcNetwork() {
   }
 }
 
-/// Requesting a network switch is not the same as getting one: a wallet can
-/// refuse it, fail quietly, or the user can switch back afterwards. Every write
-/// re-checks, because sending value to this contract address on another chain
-/// means sending it to an address with no code — the funds are simply gone.
 async function assertArcNetwork(provider) {
   const net = await provider.getNetwork();
   if (net.chainId !== BigInt(ARC_TESTNET.chainId)) {
@@ -55,26 +83,23 @@ async function assertArcNetwork(provider) {
   }
 }
 
-/// Re-checks the chain, then hands back a contract bound to a fresh signer.
-/// Call this immediately before any transaction rather than reusing a signer
-/// captured at connect time.
 async function getVerifiedWriteContract() {
-  if (!window.ethereum) {
+  const ethereum = getActiveInjectedProvider();
+  if (!ethereum) {
     throw new Error("No wallet found. Install MetaMask or another injected wallet to continue.");
   }
-  const provider = new ethers.BrowserProvider(window.ethereum);
+  const provider = new ethers.BrowserProvider(ethereum);
   await assertArcNetwork(provider);
   const signer = await provider.getSigner();
   return { contract: new ethers.Contract(TIPJAR_ADDRESS, TIPJAR_ABI, signer), signer };
 }
 
-/// A wallet can change account or network at any moment, which silently
-/// invalidates anything derived from it. Simplest correct response is to reload.
 function watchWalletChanges() {
-  if (!window.ethereum || !window.ethereum.on) return;
+  const ethereum = getActiveInjectedProvider();
+  if (!ethereum || !ethereum.on) return;
   const reload = () => window.location.reload();
-  window.ethereum.on("chainChanged", reload);
-  window.ethereum.on("accountsChanged", reload);
+  ethereum.on("chainChanged", reload);
+  ethereum.on("accountsChanged", reload);
 }
 
 let _cachedProvider = null;
@@ -89,17 +114,13 @@ function withTimeout(promise, ms, label) {
   ]).finally(() => clearTimeout(timer));
 }
 
-// The public Arc RPC rate-limits quickly, so fall back to the next URL in
-// ARC_TESTNET.rpcUrls whenever one fails. The timeout matters as much as the
-// error handling: an endpoint that hangs instead of failing would otherwise
-// stall the page forever without ever triggering the fallback.
 async function getReadOnlyProvider() {
   if (_cachedProvider) {
     try {
       await withTimeout(_cachedProvider.getBlockNumber(), 4000, "RPC");
       return _cachedProvider;
     } catch {
-      _cachedProvider = null; // it went bad; fall through and pick another
+      _cachedProvider = null;
     }
   }
 
@@ -113,7 +134,7 @@ async function getReadOnlyProvider() {
       _cachedProvider = provider;
       return provider;
     } catch (err) {
-      // try the next RPC URL
+      // try next RPC
     }
   }
   throw new Error("Couldn't reach Arc Testnet — all RPC endpoints are unavailable right now.");
@@ -127,3 +148,4 @@ async function getReadOnlyContract() {
 function shortAddress(address) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
+

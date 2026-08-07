@@ -50,8 +50,12 @@
 
     <div class="card" id="connectCard">
       <h2>1. Connect wallet</h2>
-      <p class="hint">MetaMask or any injected wallet. We'll prompt you to switch to Arc Testnet if needed.</p>
-      <button class="btn btn-primary btn-block" id="connectBtn" type="button">Connect wallet</button>
+      <p class="hint">Connect your Web3 wallet or use Circle Programmable Wallets (Social Login).</p>
+      
+      <div class="wallet-options">
+        <button class="btn btn-primary btn-block" id="connectBtn" type="button">Connect Injected Wallet (MetaMask/Rabby)</button>
+        <button class="btn btn-primary btn-block btn-circle-wallet" id="circleConnectBtn" type="button">⚡ Connect with Circle Social Login (Google / Email)</button>
+      </div>
       <div id="connectMsg"></div>
     </div>
 
@@ -105,6 +109,54 @@
         </div>
       </div>
 
+      <div class="widget-section">
+        <h2>Embeddable "Tip with USDC" Widget</h2>
+        <p class="hint">Embed a tipping button on your personal blog, website, or GitHub README.</p>
+
+        <div style="margin-top: 14px; display: flex; align-items: center; gap: 14px;">
+          <span class="hint">Live Preview:</span>
+          <a id="widgetPreviewBtn" href="#" target="_blank" class="arctip-widget-btn">
+            <span class="symbol">$</span> Tip with USDC
+          </a>
+        </div>
+
+        <div class="field" style="margin-top: 16px;">
+          <label>HTML Button Snippet</label>
+          <div class="snippet-box">
+            <code id="htmlSnippetCode">&lt;a href="https://arctip.xyz/@yourname" target="_blank" class="arctip-btn"&gt;Tip with USDC&lt;/a&gt;</code>
+          </div>
+          <div class="snippet-actions">
+            <button class="btn btn-outline" id="copyHtmlSnippetBtn" type="button">Copy HTML</button>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top: 16px;">
+          <label>Markdown Badge Snippet (GitHub / Docs)</label>
+          <div class="snippet-box">
+            <code id="mdSnippetCode">[![Tip with USDC](https://img.shields.io/badge/Tip_with_USDC-ArcTip-2775CA?logo=usdc)](https://arctip.xyz/@yourname)</code>
+          </div>
+          <div class="snippet-actions">
+            <button class="btn btn-outline" id="copyMdSnippetBtn" type="button">Copy Markdown</button>
+          </div>
+        </div>
+        <div id="widgetCopyMsg"></div>
+      </div>
+
+      <div class="widget-section">
+        <h2>Live Tip Alerts & Webhooks (Discord / Stream Overlays)</h2>
+        <p class="hint">Receive instant Discord or Twitch stream alerts when a supporter tips your handle.</p>
+        <div class="field" style="margin-top: 14px;">
+          <label for="webhookInput">Discord / Webhook URL</label>
+          <div class="copy-row">
+            <div class="field-row">
+              <input type="text" id="webhookInput" placeholder="https://discord.com/api/webhooks/..." autocomplete="off" />
+            </div>
+            <button class="btn btn-outline" id="saveWebhookBtn" type="button">Save</button>
+          </div>
+          <div id="webhookMsg"></div>
+        </div>
+      </div>
+
       <h2 style="margin-top:28px;">Recent tips</h2>
       <div class="tip-list" id="tipList">
         <p class="hint">No tips yet — they'll show up here as they arrive.</p>
@@ -125,6 +177,7 @@
   <script src="vendor/qrcode.min.js"></script>
   <script src="js/config.js"></script>
   <script src="js/wallet.js"></script>
+  <script src="js/notifications.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

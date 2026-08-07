@@ -32,7 +32,8 @@
       </a>
       <ul class="nav-links">
         <li><a href="#how-it-works">How it works</a></li>
-        <li><a href="#token">Token</a></li>
+        <li><a href="#cctp">Circle & CCTP</a></li>
+        <li><a href="#pricing">Pricing & Loyalty</a></li>
         <li><a href="#roadmap">Roadmap</a></li>
       </ul>
       <a class="btn btn-primary" href="app.html">Launch app</a>
@@ -42,6 +43,7 @@
   <main id="top">
     <header class="hero on-navy">
       <div class="wrap">
+        <div class="circle-badge"><span class="usdc-dot"></span> POWERED BY CIRCLE & USDC ON ARC</div>
         <span class="eyebrow">ARCTIP · LIVE ON ARC TESTNET</span>
         <h1>Get paid the moment someone supports you</h1>
         <p class="lead">ArcTip gives you one tip link to share. Your fans send USDC, it lands in your wallet in about a second — no address to copy, no gas token to buy first.</p>
@@ -53,7 +55,7 @@
         <dl class="spec-strip">
           <div><dt>Network</dt><dd>Arc</dd></div>
           <div><dt>Settlement</dt><dd>&lt;2s</dd></div>
-          <div><dt>Fee</dt><dd>0%*</dd></div>
+          <div><dt>Fee</dt><dd>2%*</dd></div>
           <div><dt>Status</dt><dd>Testnet</dd></div>
         </dl>
       </div>
@@ -91,7 +93,7 @@
           <div class="step">
             <div class="idx">05</div>
             <h3>You keep 98%</h3>
-            <p>Straight to your wallet — and all of it once you hold $TIP. Your fan's note comes attached if they left one.</p>
+            <p>Straight to your wallet in USDC — 98% payout rate with zero platform setup required. Your fan's note comes attached if they left one.</p>
           </div>
         </div>
 
@@ -111,30 +113,63 @@
       </div>
     </section>
 
-    <section class="section" id="token" style="background: var(--mist-100);">
+    <section class="section" id="cctp">
       <div class="wrap">
         <div class="section-head reveal">
-          <span class="eyebrow">TOKEN — $TIP · NOT LIVE YET</span>
-          <h2>What $TIP is actually for</h2>
-          <p>$TIP launches with Arc mainnet, so none of this is running today. Here's what it will do — and why each piece earns its place instead of existing to be traded.</p>
+          <div class="circle-badge"><span class="usdc-dot"></span> CIRCLE DEVELOPER PLATFORM INTEGRATION</div>
+          <h2>Built for the Circle & USDC Ecosystem</h2>
+          <p>ArcTip leverages Circle's native infrastructure to provide the smoothest micro-payment experience in Web3.</p>
+        </div>
+
+        <div class="cctp-grid reveal">
+          <div class="cctp-card">
+            <div class="cctp-icon">⚡</div>
+            <h3>USDC Native Gas on Arc</h3>
+            <p>Tips execute via native <code>msg.value</code> transfers on Arc. Fans hold USDC, tip USDC, and pay gas in USDC — no ERC-20 approval or secondary token needed.</p>
+          </div>
+          <div class="cctp-card">
+            <div class="cctp-icon">🌐</div>
+            <h3>Cross-Chain via Circle CCTP</h3>
+            <p>Fans on Ethereum, Solana, Arbitrum, or Base can tip seamlessly. Circle's Cross-Chain Transfer Protocol (CCTP) burns USDC on source and mints natively to the creator's Arc handle.</p>
+          </div>
+          <div class="cctp-card">
+            <div class="cctp-icon">🔑</div>
+            <h3>Circle Programmable Wallets</h3>
+            <p>Non-crypto fans log in effortlessly via Email, Google, or Passkeys powered by Circle Wallets — removing seed phrase friction completely.</p>
+          </div>
+          <div class="cctp-card">
+            <div class="cctp-icon">🧩</div>
+            <h3>Embeddable Creator Widgets</h3>
+            <p>Creators get instant HTML & Markdown "Tip with USDC" badges to paste into GitHub READMEs, personal blogs, Linktree, and Twitch stream overlays.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pricing" style="background: var(--mist-100);">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">TRANSPARENT PRICING · 100% USDC</span>
+          <h2>Simple, predictable USDC payouts</h2>
+          <p>No custom tokens or speculative reward schemes — ArcTip settles everything transparently in USDC.</p>
         </div>
 
         <div class="token-grid reveal">
           <div class="token-card">
-            <h3>Fee rebate</h3>
-            <p>Hold $TIP and you'll pay nothing on the tips you receive, instead of the standard 2%.</p>
+            <h3>98% Direct Payout</h3>
+            <p>98% of every tip lands straight in your wallet in less than two seconds.</p>
           </div>
           <div class="token-card">
-            <h3>Holder cashback</h3>
-            <p>Every tip will send a small percentage in $TIP back to the fan who paid it.</p>
+            <h3>Volume Fee Rebate</h3>
+            <p>High-volume creators qualify for a 0% platform fee tier verified on-chain.</p>
           </div>
           <div class="token-card">
-            <h3>Support tier</h3>
-            <p>Your biggest supporters will get a badge on your page, verified in $TIP.</p>
+            <h3>USDC Fan Badges</h3>
+            <p>Top supporters earn verified USDC supporter badges displayed on your creator page.</p>
           </div>
           <div class="token-card">
-            <h3>Curation vote</h3>
-            <p>$TIP holders will vote on which emerging creators get featured.</p>
+            <h3>Protocol Treasury</h3>
+            <p>The standard 2% fee powers continuous open-source developer tooling and infrastructure.</p>
           </div>
         </div>
       </div>
@@ -158,8 +193,8 @@
           <div class="phase">
             <div class="when">Phase 2 · Mainnet</div>
             <div>
-              <h3>Launch the token</h3>
-              <p>$TIP launches alongside Arc mainnet: hold $TIP for 0% fees, cashback goes live.</p>
+              <h3>CCTP & Loyalty Tiers</h3>
+              <p>Cross-chain CCTP integration & Volume Loyalty Tiers for top creators go live with Arc mainnet.</p>
             </div>
           </div>
           <div class="phase">
@@ -187,7 +222,7 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <span class="fine">* 0% for creators holding $TIP in their wallet, 2% without it. $TIP launches with Arc mainnet — until then every tip is 2%, since the token does not exist yet. ArcTip is an independent project built on Arc — not affiliated with Circle. Arc is currently on testnet.</span>
+      <span class="fine">* Standard 2% platform fee. ArcTip is an independent project built on Arc & Circle infrastructure — Arc is currently on testnet.</span>
       <div class="social">
         <a href="https://x.com/Arctipxyz" target="_blank" rel="noopener">X / Twitter</a>
       </div>

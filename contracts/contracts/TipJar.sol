@@ -26,8 +26,8 @@ contract TipJar is Ownable2Step, Pausable, ReentrancyGuard {
     ///      Anything that needs more simply falls through to `pendingWithdrawal`.
     uint256 private constant PAYOUT_GAS = 50_000;
 
-    uint256 public feeBps = 200; // 2% default
     address public treasury;
+    uint16 public feeBps = 200; // 2% default (packed with treasury in slot 0)
 
     // Readable counters. Deriving these from logs is not an option: Arc produces
     // ~187k blocks a day, and public RPCs reject unbounded eth_getLogs ranges,
@@ -164,7 +164,7 @@ contract TipJar is Ownable2Step, Pausable, ReentrancyGuard {
 
     // --- Admin ---
 
-    function setFeeBps(uint256 newFeeBps) external onlyOwner {
+    function setFeeBps(uint16 newFeeBps) external onlyOwner {
         if (newFeeBps > MAX_FEE_BPS) revert FeeTooHigh();
         feeBps = newFeeBps;
         emit FeeUpdated(newFeeBps);

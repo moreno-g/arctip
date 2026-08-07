@@ -134,9 +134,10 @@
       const { contract } = await getVerifiedWriteContract();
 
       const value = ethers.parseEther(selectedAmount);
+      const msgText = messageInput.value.trim();
       const tx = await contract.tip(
         handle,
-        messageInput.value.trim(),
+        msgText,
         state.quotedFeeBps ?? 200,
         { value }
       );
@@ -144,13 +145,23 @@
       sendBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
       const receipt = await tx.wait();
 
+      if (typeof ArcTipNotifications !== "undefined") {
+        ArcTipNotifications.notifyTip({
+          handle,
+          sender: state.address,
+          amountUsdc: selectedAmount,
+          message: msgText,
+          txHash: receipt.hash,
+        });
+      }
+
       receiptHandle.textContent = `@${handle}`;
       receiptAmount.textContent = `${selectedAmount} USDC`;
       receiptExplorerLink.href = `${ARC_TESTNET.blockExplorerUrls[0]}/tx/${receipt.hash}`;
       tipCard.style.display = "none";
       receiptCard.style.display = "block";
     } catch (err) {
-      showMsg(err.shortMessage || err.message || "Could not send tip.", "error");
+      showMsg(mapWeb3Error(err), "error");
     } finally {
       sendBtn.disabled = false;
       sendBtn.textContent = state.signer ? "Send tip" : "Connect wallet to tip";

@@ -23,4 +23,5 @@ so a fee raised between quote and signature reverts rather than overcharging.
 
 ## Not in scope
 
-The `$TIP` token — it does not exist yet.
+- Third-party browser extensions or external RPC infrastructure issues.
+
