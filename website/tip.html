@@ -68,7 +68,42 @@
         <textarea id="messageInput" maxlength="280" placeholder="Say something nice…"></textarea>
       </div>
 
-      <button class="btn btn-primary btn-block" id="sendBtn" type="button">Connect wallet to tip</button>
+      <div class="pay-with" id="payWith">
+        <h2>Pay with</h2>
+        <div class="wallet-options">
+          <button class="btn btn-primary btn-block" id="passkeyBtn" type="button" hidden>
+            Create a wallet with Face ID
+          </button>
+          <button class="btn btn-outline btn-block" id="passkeySignInBtn" type="button" hidden>
+            Sign in with your passkey
+          </button>
+          <button class="btn btn-outline btn-block" id="connectWalletBtn" type="button">
+            Connect a browser wallet
+          </button>
+        </div>
+        <p class="hint" id="passkeyHint" hidden>
+          A passkey wallet is made on this device with your fingerprint or face — no app to
+          install, no seed phrase to write down.
+        </p>
+      </div>
+
+      <div class="wallet-summary" id="walletSummary" hidden>
+        <div class="wallet-summary-row">
+          <span class="k">Paying from</span>
+          <span class="v" id="payerAddress"></span>
+        </div>
+        <div class="wallet-summary-row">
+          <span class="k">Balance</span>
+          <span class="v" id="payerBalance">—</span>
+        </div>
+        <div class="wallet-summary-row" id="gasRow" hidden>
+          <span class="k">Gas</span>
+          <span class="v gas-sponsored">Paid by ArcTip</span>
+        </div>
+        <button class="btn-link" id="switchWalletBtn" type="button">Use a different wallet</button>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="sendBtn" type="button" hidden>Send tip</button>
       <div id="tipMsg"></div>
     </div>
 
@@ -98,6 +133,7 @@
   <script src="js/config.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/notifications.js"></script>
+  <script src="js/passkey.js"></script>
   <script src="js/tip.js"></script>
 </body>
 </html>

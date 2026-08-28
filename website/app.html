@@ -32,7 +32,7 @@
       </a>
       <ul class="nav-links">
         <li><a href="index.html#how-it-works">How it works</a></li>
-        <li><a href="index.html#token">Token</a></li>
+        <li><a href="index.html#pricing">Pricing</a></li>
       </ul>
       <span id="walletChip"></span>
     </div>
@@ -50,12 +50,18 @@
 
     <div class="card" id="connectCard">
       <h2>1. Connect wallet</h2>
-      <p class="hint">Connect your Web3 wallet or use Circle Programmable Wallets (Social Login).</p>
-      
+      <p class="hint">This is the wallet your tips get paid to. Connect one you already have, or make one on this device with a passkey.</p>
+
       <div class="wallet-options">
-        <button class="btn btn-primary btn-block" id="connectBtn" type="button">Connect Injected Wallet (MetaMask/Rabby)</button>
-        <button class="btn btn-primary btn-block btn-circle-wallet" id="circleConnectBtn" type="button">⚡ Connect with Circle Social Login (Google / Email)</button>
+        <button class="btn btn-primary btn-block" id="connectBtn" type="button">Connect a browser wallet</button>
+        <button class="btn btn-outline btn-block" id="passkeyCreateBtn" type="button" hidden>Create a wallet with Face ID</button>
+        <button class="btn btn-outline btn-block" id="passkeySignInBtn" type="button" hidden>Sign in with your passkey</button>
       </div>
+      <p class="hint" id="passkeyHint" hidden>
+        A passkey wallet lives on this device, unlocked with your fingerprint or face. Keep the
+        passkey and you keep the wallet — losing it means losing the handle and the tips paid to it,
+        so a creator earning real money should move to a wallet they back up.
+      </p>
       <div id="connectMsg"></div>
     </div>
 
@@ -178,6 +184,7 @@
   <script src="js/config.js"></script>
   <script src="js/wallet.js"></script>
   <script src="js/notifications.js"></script>
+  <script src="js/passkey.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

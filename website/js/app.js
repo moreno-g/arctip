@@ -27,7 +27,7 @@
 
   // Transactions build their own contract via getVerifiedWriteContract, which
   // re-checks the chain each time, so nothing is cached from connect time here.
-  let state = { signer: null, address: null, handle: null };
+  let state = { mode: null, signer: null, address: null, handle: null };
   const readContractPromise = getReadOnlyContract();
 
   // Always render text as text: several call sites pass wallet/RPC error strings,
@@ -269,7 +269,9 @@
   const copyHtmlSnippetBtn = document.getElementById("copyHtmlSnippetBtn");
   const copyMdSnippetBtn = document.getElementById("copyMdSnippetBtn");
   const widgetCopyMsg = document.getElementById("widgetCopyMsg");
-  const circleConnectBtn = document.getElementById("circleConnectBtn");
+  const passkeyCreateBtn = document.getElementById("passkeyCreateBtn");
+  const passkeySignInBtn = document.getElementById("passkeySignInBtn");
+  const passkeyHint = document.getElementById("passkeyHint");
   const webhookInput = document.getElementById("webhookInput");
   const saveWebhookBtn = document.getElementById("saveWebhookBtn");
   const webhookMsg = document.getElementById("webhookMsg");
@@ -308,20 +310,70 @@
     });
   }
 
-  if (circleConnectBtn) {
-    circleConnectBtn.addEventListener("click", async () => {
-      showMsg(connectMsg, "⚡ Circle Programmable Wallet (Social Login) integration enabled on testnet. Connecting via active wallet...", "info");
-      setTimeout(async () => {
-        try {
-          const { signer, address } = await connectWallet();
-          state.signer = signer;
-          state.address = address;
-          await refreshState();
-        } catch (err) {
-          showMsg(connectMsg, mapWeb3Error(err), "error");
-        }
-      }, 1000);
-    });
+  // --- passkey wallets ---
+  //
+  // A creator arriving without a wallet is the same problem as a fan without
+  // one, minus the urgency: they can be talked through installing something.
+  // Offering a passkey anyway means the claim flow never dead-ends on a phone.
+
+  async function setUpPasskeyOptions() {
+    if (!(await ArcTipPasskey.available())) return;
+    const returning = ArcTipPasskey.hasCredential();
+    passkeyCreateBtn.hidden = returning;
+    passkeySignInBtn.hidden = !returning;
+    passkeyHint.hidden = false;
+  }
+
+  async function adoptPasskeyWallet(result) {
+    state.mode = "passkey";
+    state.signer = null;
+    state.address = result.address;
+    await refreshState();
+  }
+
+  /// WebAuthn throws DOMExceptions whose names carry the meaning; their
+  /// messages are frequently empty.
+  function mapPasskeyError(err) {
+    if (!err) return "Something went wrong setting up your wallet.";
+    if (err.name === "NotAllowedError") {
+      return "Passkey prompt dismissed — nothing was created. Try again, or connect a browser wallet.";
+    }
+    if (err.name === "InvalidStateError") {
+      return "This device already has a wallet here. Choose “Sign in with your passkey” instead.";
+    }
+    if (err.name === "SecurityError") {
+      return "Passkeys need a secure connection (https). Connect a browser wallet on this page.";
+    }
+    return err.message || "Something went wrong setting up your wallet.";
+  }
+
+  async function runPasskey(btn, label, action) {
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.innerHTML = `<span class="spinner"></span> ${label}`;
+    showMsg(connectMsg, "", "");
+    try {
+      await adoptPasskeyWallet(await action());
+    } catch (err) {
+      showMsg(connectMsg, mapPasskeyError(err), "error");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  }
+
+  if (passkeyCreateBtn) {
+    passkeyCreateBtn.addEventListener("click", () =>
+      runPasskey(passkeyCreateBtn, "Setting up your wallet…", () =>
+        ArcTipPasskey.createWallet("arctip creator")
+      )
+    );
+  }
+
+  if (passkeySignInBtn) {
+    passkeySignInBtn.addEventListener("click", () =>
+      runPasskey(passkeySignInBtn, "Unlocking…", () => ArcTipPasskey.signIn())
+    );
   }
 
   async function refreshState() {
@@ -357,6 +409,7 @@
     showMsg(connectMsg, "", "");
     try {
       const { signer, address } = await connectWallet();
+      state.mode = "injected";
       state.signer = signer;
       state.address = address;
       await refreshState();
@@ -364,7 +417,7 @@
       showMsg(connectMsg, err.message || "Could not connect wallet.", "error");
     } finally {
       connectBtn.disabled = false;
-      connectBtn.textContent = "Connect Injected Wallet (MetaMask/Rabby)";
+      connectBtn.textContent = "Connect a browser wallet";
     }
   });
 
@@ -387,12 +440,17 @@
         return;
       }
 
-      // Re-verify the chain rather than trusting the switch made at connect time.
-      claimBtn.innerHTML = `<span class="spinner"></span> Confirm in your wallet…`;
-      const { contract } = await getVerifiedWriteContract();
-      const tx = await contract.register(handle);
-      claimBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
-      await tx.wait();
+      if (state.mode === "passkey") {
+        claimBtn.innerHTML = `<span class="spinner"></span> Confirm with Face ID…`;
+        await ArcTipPasskey.claimHandle(handle);
+      } else {
+        // Re-verify the chain rather than trusting the switch made at connect time.
+        claimBtn.innerHTML = `<span class="spinner"></span> Confirm in your wallet…`;
+        const { contract } = await getVerifiedWriteContract();
+        const tx = await contract.register(handle);
+        claimBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
+        await tx.wait();
+      }
 
       showMsg(claimMsg, `@${handle} is yours.`, "success");
       await refreshState();
@@ -494,5 +552,16 @@
   });
 
   watchWalletChanges();
+
+  // Silent: rebuilding from a credential already on this device needs no
+  // biometric prompt, so a returning creator lands straight on their dashboard.
+  (async () => {
+    const resumed = await ArcTipPasskey.resume().catch(() => null);
+    if (resumed) {
+      await adoptPasskeyWallet(resumed);
+    } else {
+      await setUpPasskeyOptions();
+    }
+  })();
 })();
 

@@ -72,6 +72,9 @@
   --navy-700: #274270;
   --gold-500: #C9832A;
   --gold-600: #A4691D;
+  /* Dark enough to clear WCAG AA (5.3:1) on the --mist-100 panels;
+     --gold-600 lands at 4.0:1 there and fails. */
+  --gold-700: #8C5818;
   --gold-100: #FBEBD2;
   --line: rgba(10, 10, 10, 0.12);
   --line-on-navy: rgba(255, 255, 255, 0.16);
@@ -357,24 +360,24 @@ a:focus-visible, button:focus-visible {
 .tx-row .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .tx-row .amount { font-size: 1.1rem; font-weight: 700; }
 
-/* Token utility grid */
-.token-grid {
+/* Pricing grid */
+.pricing-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   border-top: 1px solid var(--line);
   border-left: 1px solid var(--line);
 }
-.token-card {
+.pricing-card {
   padding: 32px 30px;
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
-.token-card h3 {
+.pricing-card h3 {
   font-family: var(--font-body);
   font-weight: 700;
   font-size: 1.05rem;
 }
-.token-card p {
+.pricing-card p {
   margin-top: 10px;
   font-size: 0.95rem;
   color: var(--slate-600);
@@ -457,7 +460,7 @@ a:focus-visible, button:focus-visible {
 .site-footer .social a:hover { color: var(--ink); }
 
 @media (max-width: 860px) {
-  .token-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
   .phase { grid-template-columns: 1fr; gap: 6px; }
   .step { grid-template-columns: 32px 1fr; }
   .step p { grid-column: 2; }
@@ -774,6 +777,27 @@ a:focus-visible, button:focus-visible {
   transform: translateY(-2px);
   border-color: var(--gold-500);
 }
+/* Status tags — what is actually shipped versus what is only written.
+   Both pairs clear WCAG AA at this small size (6.8:1 and 5.9:1). */
+.status-tag {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.status-tag.is-live {
+  background: #E4F0E9;
+  color: #1E5C39;
+}
+.status-tag.is-building {
+  background: var(--gold-100);
+  color: #7E4F14;
+}
+
 .cctp-card .cctp-icon {
   font-size: 1.6rem;
   margin-bottom: 12px;
@@ -846,19 +870,58 @@ a:focus-visible, button:focus-visible {
   font-weight: 700;
 }
 
-/* Circle Wallet Option Buttons */
+/* Wallet choice — browser wallet or passkey */
 .wallet-options {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 16px;
 }
-.btn-circle-wallet {
-  background: linear-gradient(135deg, #1A5FA4 0%, #2775CA 100%);
-  color: white !important;
-  border: none;
-}
-.btn-circle-wallet:hover {
-  background: linear-gradient(135deg, #144E88 0%, #1F64AF 100%);
-}
 
+
+/* Pay with — the fan's choice of wallet on the tip page */
+.pay-with { margin-top: 28px; }
+.pay-with h2 { margin-bottom: 0; }
+/* .btn-block carries its own top margin for standalone use; inside the stack
+   the flex gap does the spacing, so cancel it to keep the rhythm even. */
+.wallet-options .btn-block { margin-top: 0; }
+
+.wallet-summary {
+  margin-top: 24px;
+  padding: 18px 20px;
+  background: var(--mist-100);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.wallet-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 7px 0;
+  font-size: 0.95rem;
+}
+.wallet-summary-row .k { color: var(--slate-400); }
+.wallet-summary-row .v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+/* The whole promise of the paymaster, in one row — worth the accent. */
+.wallet-summary-row .gas-sponsored {
+  color: var(--gold-700);
+  font-weight: 700;
+}
+.btn-link {
+  margin-top: 10px;
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--slate-400);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.btn-link:hover { color: var(--ink); }
