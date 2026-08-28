@@ -10,7 +10,7 @@ Live sur **Arc testnet** → [arctip.xyz](https://arctip.xyz). **Mainnet Arc : 1
 contracts/   Solidity (Hardhat) — TipJar, ArcTipPaymaster, interfaces/, mocks/, tests, scripts
 website/     site + app statiques, aucune étape de build
 tools/       build ponctuel du bundle Circle vendoré (npm isolé ici, pas dans website/)
-server.js    serveur statique node:http qui sert website/ (pour Railway)
+server.js    petit serveur statique node:http pour servir website/ en local
 ```
 
 ## Commandes
@@ -92,7 +92,9 @@ Le compte Vercel qui possède le projet (`team_p04BXb25…`) n'est pas le même 
 
 ⚠️ **`website/vercel.json` n'est pas un reliquat.** Il porte la réécriture `/@:handle` →
 `tip.html`, c'est-à-dire toute la surface de partage du produit. Sans lui, chaque lien créateur
-renvoie un 404. `railway.json` et `server.js` à la racine sont un chemin distinct et inutilisé.
+renvoie un 404. À ne pas confondre avec `railway.json`, qui lui en était bien un : le projet
+Railway a été supprimé le 28 août 2026 sans que le site bronche, puisqu'il ne l'avait jamais
+servi. `server.js` reste, mais seulement comme serveur de dev derrière `npm start`.
 
 ## À nettoyer
 

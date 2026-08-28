@@ -139,8 +139,11 @@ repo and stayed on the live site for months afterwards.
 
 `website/vercel.json` is **not** a leftover. It carries the `/@:handle` rewrite
 that serves `tip.html`, which is the entire share-link surface of the product —
-without it every creator link 404s. `railway.json` and `server.js` at the repo
-root are a separate, unused path.
+without it every creator link 404s.
+
+`railway.json` was a leftover, and is gone: the Railway project was deleted on
+28 August 2026 and the site never flinched, because Railway had never served it.
+`server.js` stays as the local dev server behind `npm start`.
 
 ## Status
 
