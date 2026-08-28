@@ -12,6 +12,7 @@ module.exports = {
     },
   },
   networks: {
+    localhost: { url: "http://127.0.0.1:8545" },
     arcTestnet: {
       url: process.env.ARC_TESTNET_RPC_URL || "https://rpc.testnet.arc.network",
       chainId: 5042002,
