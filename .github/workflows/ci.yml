@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A second push to a PR makes the first run pointless — don't pay for it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
+
+      # `npm ci` rather than `npm install`: it fails loudly when the lockfile
+      # and package.json have drifted, instead of quietly resolving something
+      # nobody tested against.
+      - name: Install
+        working-directory: contracts
+        run: npm ci
+
+      - name: Test
+        working-directory: contracts
+        run: npm test
+
+  website:
+    name: Website syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # website/ has no build step and no dependencies, so there is nothing to
+      # install and nothing to bundle. What it does have is plain <script> tags:
+      # a syntax error there is invisible until the page is open in a browser,
+      # which is exactly the kind of break that reaches production. `--check`
+      # catches it in a second without adding a toolchain to a directory whose
+      # whole point is not having one.
+      #
+      # vendor/ is skipped: third-party minified code, not ours to fix.
+      - name: Parse every front-end script
+        run: |
+          set -e
+          for f in website/js/*.js website/script.js server.js; do
+            echo "checking $f"
+            node --check "$f"
+          done

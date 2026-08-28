@@ -17,3 +17,7 @@ image-*.png
 
 # Claude Code — réglages personnels, pas partagés
 .claude/settings.local.json
+
+# Copie locale des instructions projet pour d'autres agents — le fichier
+# partagé est CLAUDE.md, et deux copies finissent toujours par diverger.
+AGENTS.md
