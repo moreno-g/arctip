@@ -124,6 +124,24 @@ reach the thing they fund.
 Contract addresses live in [`website/js/config.js`](website/js/config.js) and
 must be updated after any redeploy.
 
+## Publishing the site
+
+`arctip.xyz` is served by **Vercel**, from the `website/` directory, and the
+deploy is **manual** — nothing publishes on a push to `main`:
+
+```bash
+cd website && npx vercel --prod
+```
+
+Because it is manual, the live site drifts behind the repo whenever the command
+is forgotten. It has done so before: the `$TIP` section was removed from the
+repo and stayed on the live site for months afterwards.
+
+`website/vercel.json` is **not** a leftover. It carries the `/@:handle` rewrite
+that serves `tip.html`, which is the entire share-link surface of the product —
+without it every creator link 404s. `railway.json` and `server.js` at the repo
+root are a separate, unused path.
+
 ## Status
 
 Testnet. Arc mainnet opens 16 September 2026.

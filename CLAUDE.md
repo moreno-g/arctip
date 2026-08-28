@@ -73,6 +73,27 @@ node tools/circle-bundle/build.js   # régénère website/vendor/circle-passkey.
 - Le sponsoring et les passkeys sont **inertes tant que `CIRCLE_WALLETS.clientKey` est vide**
   dans `website/js/config.js`. La clé est publique (restreinte par domaine), pas un secret.
 
+## Déploiement
+
+**`arctip.xyz` est servi par Vercel, pas par Railway**, depuis `website/`, et le
+déploiement est **manuel** :
+
+```
+cd website && npx vercel --prod
+```
+
+Rien ne se publie sur un push vers `main`. C'est le piège principal de ce repo : le site
+en ligne dérive du dépôt dès qu'on oublie la commande. Constaté le 28 août 2026 — la section
+`$TIP` avait été retirée du dépôt et était **toujours en ligne**, avec fee rebate, cashback et
+vote de curation, soit précisément ce qui devait disparaître avant le dossier Circle.
+
+Le compte Vercel qui possède le projet (`team_p04BXb25…`) n'est pas le même que `moreno-g` :
+`npx vercel --prod` doit tourner avec le bon compte connecté.
+
+⚠️ **`website/vercel.json` n'est pas un reliquat.** Il porte la réécriture `/@:handle` →
+`tip.html`, c'est-à-dire toute la surface de partage du produit. Sans lui, chaque lien créateur
+renvoie un 404. `railway.json` et `server.js` à la racine sont un chemin distinct et inutilisé.
+
 ## À nettoyer
 
 Trois captures traînent à la racine (`image-178499*.png`). Elles sont déjà couvertes par la règle
