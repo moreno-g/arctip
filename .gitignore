@@ -14,3 +14,6 @@ website/.vercel
 
 # stray screenshots dropped into the repo root
 image-*.png
+
+# Claude Code — réglages personnels, pas partagés
+.claude/settings.local.json
