@@ -1,10 +1,10 @@
 # ArcTip
 
-Lien de pourboire créateur réglé en **USDC sur Arc** : `arctip.xyz/@handle`. Le contrat `TipJar`
+Lien de pourboire créateur réglé en **USDC sur Arc** : `arctip.app/@handle`. Le contrat `TipJar`
 répartit le paiement, la part créateur part directement dans son wallet. `ArcTipPaymaster`
 sponsorise le gas du fan et se rembourse sur les frais.
 
-Live sur **Arc testnet** → [arctip.xyz](https://arctip.xyz). **Mainnet Arc : 16 septembre 2026.**
+Live sur **Arc testnet** → [arctip.app](https://arctip.app). **Mainnet Arc : 16 septembre 2026.**
 
 ```
 contracts/   Solidity (Hardhat) — TipJar, ArcTipPaymaster, interfaces/, mocks/, tests, scripts
@@ -75,20 +75,29 @@ node tools/circle-bundle/build.js   # régénère website/vendor/circle-passkey.
 
 ## Déploiement
 
-**`arctip.xyz` est servi par Vercel, pas par Railway**, depuis `website/`, et le
-déploiement est **manuel** :
+Le site est servi par **Vercel**, depuis `website/`, et le déploiement est **manuel** :
 
 ```
 cd website && npx vercel --prod
 ```
 
 Rien ne se publie sur un push vers `main`. C'est le piège principal de ce repo : le site
-en ligne dérive du dépôt dès qu'on oublie la commande. Constaté le 28 août 2026 — la section
-`$TIP` avait été retirée du dépôt et était **toujours en ligne**, avec fee rebate, cashback et
-vote de curation, soit précisément ce qui devait disparaître avant le dossier Circle.
+en ligne dérive du dépôt dès qu'on oublie la commande.
 
-Le compte Vercel qui possède le projet (`team_p04BXb25…`) n'est pas le même que `moreno-g` :
-`npx vercel --prod` doit tourner avec le bon compte connecté.
+| | |
+|---|---|
+| Team Vercel | `moreno-g` |
+| Projet | `arctip` (`prj_nZkqNAvpixOazDItfo24GnmNf8Ay`) |
+| URL en ligne | `arctip-psi.vercel.app` |
+| Domaine visé | `arctip.app` |
+
+⚠️ **`arctip.xyz` est perdu, et affiche encore la section `$TIP`.** Le domaine a été acheté le
+25 juillet 2026 via un compte Vercel (`team_p04BXb25…`) dont l'identifiant n'a pas été retrouvé.
+Le domaine, son DNS et le projet d'origine sont tous dessus, donc rien ne peut y être corrigé —
+et le registre le bloque jusqu'à son expiration, le 25 juillet 2027. Conséquence pratique :
+**ne plus citer `arctip.xyz` nulle part**, surtout pas dans le dossier Circle, puisque la page
+qu'il sert vante un token qui n'existe plus. Le registrar est Name.com (celui que Vercel utilise
+en coulisses) ; retrouver l'e-mail d'achat du 25 juillet rouvrirait tout.
 
 ⚠️ **`website/vercel.json` n'est pas un reliquat.** Il porte la réécriture `/@:handle` →
 `tip.html`, c'est-à-dire toute la surface de partage du produit. Sans lui, chaque lien créateur

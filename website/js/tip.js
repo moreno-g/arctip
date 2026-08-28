@@ -269,7 +269,7 @@
     if (!handle) {
       handleTitle.textContent = "No handle in this link";
       handleLead.textContent =
-        "An ArcTip link looks like arctip.xyz/@name — ask the creator for theirs.";
+        "An ArcTip link looks like arctip.app/@name — ask the creator for theirs.";
       return;
     }
 

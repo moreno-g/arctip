@@ -1,10 +1,10 @@
 # ArcTip
 
 A tip link for creators, settled in USDC on [Arc](https://arc.io). One link —
-`arctip.xyz/@handle` — that fans use to send USDC, which lands in the creator's
+`arctip.app/@handle` — that fans use to send USDC, which lands in the creator's
 wallet in about a second.
 
-**Live on Arc testnet:** [arctip.xyz](https://arctip.xyz)
+**Live on Arc testnet:** [arctip.app](https://arctip.app)
 
 ```
 contracts/   Solidity (Hardhat) — TipJar, ArcTipPaymaster, tests, deploy scripts
@@ -22,7 +22,7 @@ Here the fan holds USDC, tips USDC, and pays gas in USDC.
 
 1. A creator connects a wallet — or makes one from a passkey — and claims a
    handle (`register`)
-2. They share `arctip.xyz/@handle`, or the QR code and share card generated for them
+2. They share `arctip.app/@handle`, or the QR code and share card generated for them
 3. A fan picks an amount and confirms (`tip`)
 4. The contract splits the payment: the creator's share goes straight to their
    wallet, the fee to the treasury
@@ -126,16 +126,23 @@ must be updated after any redeploy.
 
 ## Publishing the site
 
-`arctip.xyz` is served by **Vercel**, from the `website/` directory, and the
-deploy is **manual** — nothing publishes on a push to `main`:
+The site is served by **Vercel** from the `website/` directory, in the `arctip`
+project under the `moreno-g` team, and the deploy is **manual** — nothing
+publishes on a push to `main`:
 
 ```bash
 cd website && npx vercel --prod
 ```
 
 Because it is manual, the live site drifts behind the repo whenever the command
-is forgotten. It has done so before: the `$TIP` section was removed from the
-repo and stayed on the live site for months afterwards.
+is forgotten. It has done so before, and expensively: the `$TIP` section was
+removed from the repo and stayed live for months afterwards.
+
+**`arctip.xyz` is lost.** It was bought on 25 July 2026 through a Vercel account
+whose login could not be recovered; the domain, its DNS and the original project
+all live there, so the old page — `$TIP` section included — cannot be corrected
+and stays up until the domain expires on 25 July 2027. Do not reference
+`arctip.xyz` anywhere. `arctip.app` replaces it.
 
 `website/vercel.json` is **not** a leftover. It carries the `/@:handle` rewrite
 that serves `tip.html`, which is the entire share-link surface of the product —
