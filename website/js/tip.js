@@ -30,11 +30,27 @@
   const recipientExplorer = document.getElementById("recipientExplorer");
   const sendAnotherBtn = document.getElementById("sendAnotherBtn");
 
+  const payWith = document.getElementById("payWith");
+  const passkeyBtn = document.getElementById("passkeyBtn");
+  const passkeySignInBtn = document.getElementById("passkeySignInBtn");
+  const connectWalletBtn = document.getElementById("connectWalletBtn");
+  const passkeyHint = document.getElementById("passkeyHint");
+  const walletSummary = document.getElementById("walletSummary");
+  const payerAddress = document.getElementById("payerAddress");
+  const payerBalance = document.getElementById("payerBalance");
+  const gasRow = document.getElementById("gasRow");
+  const switchWalletBtn = document.getElementById("switchWalletBtn");
+
   const readContractPromise = getReadOnlyContract();
+
   // The fee read when the page loaded. It is sent with the tip as the highest
   // fee the sender agrees to, so if it is raised between now and the wallet
   // prompt the transaction reverts instead of quietly overcharging.
-  let state = { signer: null, address: null, quotedFeeBps: null };
+  //
+  // `mode` decides who pays and how: "passkey" routes a sponsored user
+  // operation through the paymaster, "injected" is an ordinary transaction the
+  // fan pays gas for themselves.
+  let state = { mode: null, signer: null, address: null, quotedFeeBps: null };
 
   // Kept as the raw string the user typed. Going through Number() and back turns
   // 0.0000001 into "1e-7", which parseEther rejects outright, and silently
@@ -65,13 +81,189 @@
         customField.style.display = "none";
         selectedAmount = btn.dataset.amount;
       }
+      refreshAffordability();
     });
   });
 
   customInput.addEventListener("input", () => {
     const raw = customInput.value.trim();
     selectedAmount = AMOUNT_RE.test(raw) && Number(raw) > 0 ? raw : null;
+    refreshAffordability();
   });
+
+  // --- wallet selection ---
+
+  function walletChipNode(address) {
+    const chip = document.createElement("span");
+    chip.className = "wallet-chip";
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    chip.append(dot, document.createTextNode(shortAddress(address)));
+    return chip;
+  }
+
+  /// Decide which ways in to offer. A fan with a browser wallet should never be
+  /// nudged into making a second one, and a phone with no wallet at all should
+  /// never be shown a dead "connect" button as its only option.
+  async function setUpWalletOptions() {
+    const passkeyReady = await ArcTipPasskey.available();
+    if (passkeyReady) {
+      const returning = ArcTipPasskey.hasCredential();
+      passkeyBtn.hidden = returning;
+      passkeySignInBtn.hidden = !returning;
+      passkeyHint.hidden = returning;
+    }
+    // Always leave the browser-wallet path visible: it is the one that works
+    // without a Circle key, and the fallback when a passkey prompt is refused.
+    connectWalletBtn.hidden = false;
+    sendBtn.hidden = true;
+  }
+
+  async function adoptPasskeyWallet(result) {
+    state.mode = "passkey";
+    state.address = result.address;
+    state.signer = null;
+    await showConnectedWallet({ sponsored: true });
+  }
+
+  async function showConnectedWallet({ sponsored }) {
+    payWith.hidden = true;
+    walletSummary.hidden = false;
+    sendBtn.hidden = false;
+    payerAddress.textContent = shortAddress(state.address);
+    gasRow.hidden = !sponsored;
+    walletChip.replaceChildren(walletChipNode(state.address));
+    await refreshBalance();
+  }
+
+  /// The balance matters here in a way it does not on the creator side: the
+  /// paymaster covers gas but never the tip, so a fresh passkey wallet holding
+  /// nothing can still reach the send button. Showing the balance next to the
+  /// amount is what makes that legible before the fan commits.
+  let currentBalance = null;
+
+  async function refreshBalance() {
+    try {
+      let raw;
+      if (state.mode === "passkey") {
+        raw = await ArcTipPasskey.balance();
+      } else {
+        const provider = await getReadOnlyProvider();
+        raw = await provider.getBalance(state.address);
+      }
+      currentBalance = raw;
+      payerBalance.textContent = `${Number(ethers.formatEther(raw)).toFixed(2)} USDC`;
+    } catch {
+      currentBalance = null;
+      payerBalance.textContent = "—";
+    }
+    refreshAffordability();
+  }
+
+  /// Warn before the wallet prompt, not after it fails. A sponsored tip needs
+  /// the amount and nothing more; an unsponsored one needs a little over, for
+  /// gas the fan pays themselves.
+  function refreshAffordability() {
+    if (!state.address || currentBalance === null || !selectedAmount) {
+      if (state.address) showMsg("", "");
+      return;
+    }
+    let needed;
+    try {
+      needed = ethers.parseEther(selectedAmount);
+    } catch {
+      return;
+    }
+    if (currentBalance < needed) {
+      const short = ethers.formatEther(needed - currentBalance);
+      showMsg(
+        `This wallet holds ${Number(ethers.formatEther(currentBalance)).toFixed(2)} USDC — ` +
+          `${Number(short).toFixed(2)} short of a ${selectedAmount} USDC tip. ` +
+          `Send USDC to ${state.address} on Arc, then try again.`,
+        "info"
+      );
+    } else {
+      showMsg("", "");
+    }
+  }
+
+  passkeyBtn.addEventListener("click", async () => {
+    passkeyBtn.disabled = true;
+    const original = passkeyBtn.textContent;
+    passkeyBtn.innerHTML = `<span class="spinner"></span> Setting up your wallet…`;
+    showMsg("", "");
+    try {
+      const result = await ArcTipPasskey.createWallet(`tip to @${handle}`);
+      await adoptPasskeyWallet(result);
+    } catch (err) {
+      showMsg(mapPasskeyError(err), "error");
+    } finally {
+      passkeyBtn.disabled = false;
+      passkeyBtn.textContent = original;
+    }
+  });
+
+  passkeySignInBtn.addEventListener("click", async () => {
+    passkeySignInBtn.disabled = true;
+    const original = passkeySignInBtn.textContent;
+    passkeySignInBtn.innerHTML = `<span class="spinner"></span> Unlocking…`;
+    showMsg("", "");
+    try {
+      const result = await ArcTipPasskey.signIn();
+      await adoptPasskeyWallet(result);
+    } catch (err) {
+      showMsg(mapPasskeyError(err), "error");
+    } finally {
+      passkeySignInBtn.disabled = false;
+      passkeySignInBtn.textContent = original;
+    }
+  });
+
+  connectWalletBtn.addEventListener("click", async () => {
+    connectWalletBtn.disabled = true;
+    const original = connectWalletBtn.textContent;
+    connectWalletBtn.innerHTML = `<span class="spinner"></span> Connecting…`;
+    showMsg("", "");
+    try {
+      const { signer, address } = await connectWallet();
+      state.mode = "injected";
+      state.signer = signer;
+      state.address = address;
+      await showConnectedWallet({ sponsored: false });
+    } catch (err) {
+      showMsg(mapWeb3Error(err), "error");
+    } finally {
+      connectWalletBtn.disabled = false;
+      connectWalletBtn.textContent = original;
+    }
+  });
+
+  switchWalletBtn.addEventListener("click", async () => {
+    if (state.mode === "passkey") ArcTipPasskey.forget();
+    state = { mode: null, signer: null, address: null, quotedFeeBps: state.quotedFeeBps };
+    currentBalance = null;
+    walletSummary.hidden = true;
+    payWith.hidden = false;
+    walletChip.replaceChildren();
+    showMsg("", "");
+    await setUpWalletOptions();
+  });
+
+  /// WebAuthn throws DOMExceptions whose names say more than their messages,
+  /// which are often empty. Map the ones a fan can actually act on.
+  function mapPasskeyError(err) {
+    if (!err) return "Something went wrong setting up your wallet.";
+    if (err.name === "NotAllowedError") {
+      return "Passkey prompt dismissed — nothing was created. Try again, or use a browser wallet.";
+    }
+    if (err.name === "InvalidStateError") {
+      return "This device already has a wallet here. Choose “Sign in with your passkey” instead.";
+    }
+    if (err.name === "SecurityError") {
+      return "Passkeys need a secure connection (https). Use a browser wallet on this page.";
+    }
+    return err.message || "Something went wrong setting up your wallet.";
+  }
 
   async function init() {
     if (!handle) {
@@ -102,6 +294,15 @@
       recipientExplorer.href = `${ARC_TESTNET.blockExplorerUrls[0]}/address/${owner}`;
 
       tipCard.style.display = "block";
+
+      // Silent: rebuilding a wallet from a credential already on this device
+      // needs no biometric prompt, so a returning fan lands straight on Send.
+      const resumed = await ArcTipPasskey.resume().catch(() => null);
+      if (resumed) {
+        await adoptPasskeyWallet(resumed);
+      } else {
+        await setUpWalletOptions();
+      }
     } catch (err) {
       handleTitle.textContent = `@${handle}`;
       notFoundMsg.style.display = "block";
@@ -117,33 +318,39 @@
       showMsg("Pick an amount first, or enter a valid number.", "error");
       return;
     }
+    if (!state.address) {
+      showMsg("Choose how you want to pay first.", "error");
+      return;
+    }
 
     sendBtn.disabled = true;
+    const msgText = messageInput.value.trim();
+    const maxFeeBps = state.quotedFeeBps ?? 200;
+
     try {
-      if (!state.signer) {
-        sendBtn.innerHTML = `<span class="spinner"></span> Connecting wallet…`;
-        const { signer, address } = await connectWallet();
-        state.signer = signer;
-        state.address = address;
-        walletChip.replaceChildren(walletChipNode(address));
+      let txHash;
+
+      if (state.mode === "passkey") {
+        sendBtn.innerHTML = `<span class="spinner"></span> Confirm with Face ID…`;
+        const result = await ArcTipPasskey.sendTip({
+          handle,
+          message: msgText,
+          amount: selectedAmount,
+          maxFeeBps,
+        });
+        txHash = result.txHash;
+      } else {
+        // Re-verify the chain here rather than trusting the switch made at
+        // connect time: sending value to this address on the wrong chain
+        // destroys it.
+        sendBtn.innerHTML = `<span class="spinner"></span> Confirm in your wallet…`;
+        const { contract } = await getVerifiedWriteContract();
+        const tx = await contract.tip(handle, msgText, maxFeeBps, {
+          value: ethers.parseEther(selectedAmount),
+        });
+        sendBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
+        txHash = (await tx.wait()).hash;
       }
-
-      // Re-verify the chain here rather than trusting the switch made at connect
-      // time: sending value to this address on the wrong chain destroys it.
-      sendBtn.innerHTML = `<span class="spinner"></span> Confirm in your wallet…`;
-      const { contract } = await getVerifiedWriteContract();
-
-      const value = ethers.parseEther(selectedAmount);
-      const msgText = messageInput.value.trim();
-      const tx = await contract.tip(
-        handle,
-        msgText,
-        state.quotedFeeBps ?? 200,
-        { value }
-      );
-
-      sendBtn.innerHTML = `<span class="spinner"></span> Waiting for confirmation…`;
-      const receipt = await tx.wait();
 
       if (typeof ArcTipNotifications !== "undefined") {
         ArcTipNotifications.notifyTip({
@@ -151,24 +358,24 @@
           sender: state.address,
           amountUsdc: selectedAmount,
           message: msgText,
-          txHash: receipt.hash,
+          txHash,
         });
       }
 
       receiptHandle.textContent = `@${handle}`;
       receiptAmount.textContent = `${selectedAmount} USDC`;
-      receiptExplorerLink.href = `${ARC_TESTNET.blockExplorerUrls[0]}/tx/${receipt.hash}`;
+      receiptExplorerLink.href = `${ARC_TESTNET.blockExplorerUrls[0]}/tx/${txHash}`;
       tipCard.style.display = "none";
       receiptCard.style.display = "block";
     } catch (err) {
-      showMsg(mapWeb3Error(err), "error");
+      showMsg(state.mode === "passkey" ? mapPasskeyError(err) : mapWeb3Error(err), "error");
     } finally {
       sendBtn.disabled = false;
-      sendBtn.textContent = state.signer ? "Send tip" : "Connect wallet to tip";
+      sendBtn.textContent = "Send tip";
     }
   });
 
-  sendAnotherBtn.addEventListener("click", () => {
+  sendAnotherBtn.addEventListener("click", async () => {
     receiptCard.style.display = "none";
     tipCard.style.display = "block";
     amountBtns.forEach((b) => b.classList.remove("is-active"));
@@ -177,16 +384,9 @@
     messageInput.value = "";
     selectedAmount = null;
     showMsg("", "");
+    // The tip just left this wallet, so the balance on screen is stale.
+    if (state.address) await refreshBalance();
   });
-
-  function walletChipNode(address) {
-    const chip = document.createElement("span");
-    chip.className = "wallet-chip";
-    const dot = document.createElement("span");
-    dot.className = "dot";
-    chip.append(dot, document.createTextNode(shortAddress(address)));
-    return chip;
-  }
 
   watchWalletChanges();
   init();

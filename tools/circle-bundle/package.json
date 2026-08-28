@@ -1,0 +1,17 @@
+{
+  "name": "arctip-circle-bundle",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Builds the vendored Circle Modular Wallets bundle for website/vendor/. Not part of the site: website/ stays build-free and dependency-free at runtime.",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "@circle-fin/modular-wallets-core": "1.0.15",
+    "viem": "2.45.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

@@ -33,7 +33,7 @@
       <ul class="nav-links">
         <li><a href="#how-it-works">How it works</a></li>
         <li><a href="#cctp">Circle & CCTP</a></li>
-        <li><a href="#pricing">Pricing & Loyalty</a></li>
+        <li><a href="#pricing">Pricing</a></li>
         <li><a href="#roadmap">Roadmap</a></li>
       </ul>
       <a class="btn btn-primary" href="app.html">Launch app</a>
@@ -123,24 +123,28 @@
 
         <div class="cctp-grid reveal">
           <div class="cctp-card">
+            <span class="status-tag is-live">Live</span>
             <div class="cctp-icon">⚡</div>
-            <h3>USDC Native Gas on Arc</h3>
-            <p>Tips execute via native <code>msg.value</code> transfers on Arc. Fans hold USDC, tip USDC, and pay gas in USDC — no ERC-20 approval or secondary token needed.</p>
+            <h3>USDC is the gas, not just the payment</h3>
+            <p>Tips move as native <code>msg.value</code> transfers. The fan holds USDC, tips USDC and pays gas in USDC — no approval step, no second token, no bridge before they can start.</p>
           </div>
           <div class="cctp-card">
-            <div class="cctp-icon">🌐</div>
-            <h3>Cross-Chain via Circle CCTP</h3>
-            <p>Fans on Ethereum, Solana, Arbitrum, or Base can tip seamlessly. Circle's Cross-Chain Transfer Protocol (CCTP) burns USDC on source and mints natively to the creator's Arc handle.</p>
+            <span class="status-tag is-building">Built, not yet deployed</span>
+            <div class="cctp-icon">⛽</div>
+            <h3>We pay the gas, the fee pays us back</h3>
+            <p>A sponsored tip costs about 0.0039 USDC in gas; the 2% fee on a 1 USDC tip is 0.02. The fee covers the gas roughly five times over, so sponsorship funds itself on-chain instead of running off a budget — and the ratio is a public counter you can read.</p>
           </div>
           <div class="cctp-card">
+            <span class="status-tag is-building">Built, needs a Circle key</span>
             <div class="cctp-icon">🔑</div>
-            <h3>Circle Programmable Wallets</h3>
-            <p>Non-crypto fans log in effortlessly via Email, Google, or Passkeys powered by Circle Wallets — removing seed phrase friction completely.</p>
+            <h3>A wallet made with your face</h3>
+            <p>Circle Modular Wallets turn a passkey into a smart account on Arc. No extension, no seed phrase, no app — the fan taps once with Face ID and can tip. Arc has no P-256 precompile, so the passkey signature is verified by Circle's account rather than by us.</p>
           </div>
           <div class="cctp-card">
-            <div class="cctp-icon">🧩</div>
-            <h3>Embeddable Creator Widgets</h3>
-            <p>Creators get instant HTML & Markdown "Tip with USDC" badges to paste into GitHub READMEs, personal blogs, Linktree, and Twitch stream overlays.</p>
+            <span class="status-tag is-live">Live on Arc</span>
+            <div class="cctp-icon">🌐</div>
+            <h3>Arriving from another chain</h3>
+            <p>CCTP mints into Arc's ERC-20 view of the native balance, so USDC bridged from Ethereum, Base or Solana lands as spendable gas and spendable tip in one step — no wrapper contract, and nothing for us to sit in the middle of.</p>
           </div>
         </div>
       </div>
@@ -154,22 +158,22 @@
           <p>No custom tokens or speculative reward schemes — ArcTip settles everything transparently in USDC.</p>
         </div>
 
-        <div class="token-grid reveal">
-          <div class="token-card">
-            <h3>98% Direct Payout</h3>
-            <p>98% of every tip lands straight in your wallet in less than two seconds.</p>
+        <div class="pricing-grid reveal">
+          <div class="pricing-card">
+            <h3>98% lands directly</h3>
+            <p>The creator's share never touches an ArcTip balance. The contract splits the payment and pays the creator's wallet in the same transaction.</p>
           </div>
-          <div class="token-card">
-            <h3>Volume Fee Rebate</h3>
-            <p>High-volume creators qualify for a 0% platform fee tier verified on-chain.</p>
+          <div class="pricing-card">
+            <h3>2%, capped in the contract</h3>
+            <p><code>MAX_FEE_BPS</code> is a constant: the fee can never be raised above 5%, by us or by anyone else. Every tip also carries the highest fee its sender agreed to, so a raise mid-flight reverts instead of overcharging.</p>
           </div>
-          <div class="token-card">
-            <h3>USDC Fan Badges</h3>
-            <p>Top supporters earn verified USDC supporter badges displayed on your creator page.</p>
+          <div class="pricing-card">
+            <h3>No token, and none planned</h3>
+            <p>Nothing to buy, hold, or stake. Tips are USDC, the fee is USDC, payouts are USDC. There is no ArcTip token and the contract has no mechanism to mint one.</p>
           </div>
-          <div class="token-card">
-            <h3>Protocol Treasury</h3>
-            <p>The standard 2% fee powers continuous open-source developer tooling and infrastructure.</p>
+          <div class="pricing-card">
+            <h3>Where the 2% goes</h3>
+            <p>It funds the gas ArcTip sponsors on behalf of fans, then the hosting and the contract work. The treasury address is in the deployment record and readable on-chain.</p>
           </div>
         </div>
       </div>
@@ -193,8 +197,8 @@
           <div class="phase">
             <div class="when">Phase 2 · Mainnet</div>
             <div>
-              <h3>CCTP & Loyalty Tiers</h3>
-              <p>Cross-chain CCTP integration & Volume Loyalty Tiers for top creators go live with Arc mainnet.</p>
+              <h3>Land on mainnet</h3>
+              <p>Arc mainnet opens 16 September 2026. Sponsored gas and passkey wallets ship with it, so a fan needs neither a wallet extension nor a gas balance to tip.</p>
             </div>
           </div>
           <div class="phase">
