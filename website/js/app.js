@@ -365,7 +365,7 @@
   if (passkeyCreateBtn) {
     passkeyCreateBtn.addEventListener("click", () =>
       runPasskey(passkeyCreateBtn, "Setting up your wallet…", () =>
-        ArcTipPasskey.createWallet("arctip creator")
+        ArcTipPasskey.createWallet("creator")
       )
     );
   }

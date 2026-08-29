@@ -222,7 +222,7 @@
     passkeyBtn.innerHTML = `<span class="spinner"></span> Setting up your wallet…`;
     showMsg("", "");
     try {
-      const result = await ArcTipPasskey.createWallet(`tip to @${handle}`);
+      const result = await ArcTipPasskey.createWallet(handle);
       await adoptPasskeyWallet(result);
     } catch (err) {
       showMsg(mapPasskeyError(err), "error");

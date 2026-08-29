@@ -75,9 +75,22 @@ const ArcTipPasskey = (() => {
     return api.resume();
   }
 
-  async function createWallet(username) {
+  // Circle rejects anything outside 5-50 characters of alphanumerics and
+  // `_@.:+-` — spaces included. The name is not decorative: it is what the OS
+  // shows in its passkey prompt and in the password manager afterwards, so it
+  // has to read as an identity rather than a slug.
+  const USERNAME_RE = /^[A-Za-z0-9_@.:+-]{5,50}$/;
+
+  function passkeyName(handle) {
+    const clean = String(handle || "").toLowerCase().replace(/[^a-z0-9_]/g, "");
+    const name = `${clean || "supporter"}@arctip.app`;
+    // Belt and braces: fall back rather than let Circle reject the call.
+    return USERNAME_RE.test(name) ? name : "supporter@arctip.app";
+  }
+
+  async function createWallet(handle) {
     const api = await loadBundle();
-    const name = (username || "").trim() || "arctip supporter";
+    const name = passkeyName(handle);
     localStorage.setItem(USERNAME_KEY, name);
     return api.register(name);
   }
