@@ -88,6 +88,10 @@
 }
 
 * { box-sizing: border-box; }
+/* `hidden` must win over any component that sets its own display. Without this,
+   .btn's `display: inline-flex` outranks the user-agent [hidden] rule and every
+   button marked hidden stays on screen. */
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
@@ -675,7 +679,6 @@ a:focus-visible, button:focus-visible {
   gap: 10px;
 }
 .share-actions .btn { flex: none; }
-.share-actions .btn[hidden] { display: none; }
 
 @media (max-width: 520px) {
   .share-actions .btn { flex: 1 1 auto; justify-content: center; }
