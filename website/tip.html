@@ -104,6 +104,28 @@
         <button class="btn-link" id="switchWalletBtn" type="button">Use a different wallet</button>
       </div>
 
+      <!-- A passkey wallet starts empty, and sponsorship covers the gas but never
+           the tip. Without a way to read and share the address, a wallet created
+           here is a dead end. -->
+      <div class="funding" id="fundingPanel" hidden>
+        <h3>Add USDC to this wallet</h3>
+        <p class="hint">Send USDC on Arc to this address. It is yours — unlocked by the passkey on this device.</p>
+        <div class="funding-addr">
+          <code id="fundingAddress"></code>
+          <button class="btn btn-outline" id="copyAddressBtn" type="button">Copy</button>
+        </div>
+        <div class="funding-qr">
+          <canvas id="fundingQr" role="img" aria-label="QR code of your wallet address"></canvas>
+          <p class="hint">Scan from another wallet to send to it.</p>
+        </div>
+        <p class="hint funding-faucet">
+          Testing on Arc testnet? Circle's
+          <a href="https://faucet.circle.com" target="_blank" rel="noopener">faucet</a>
+          gives 1 USDC a day — enough for one sponsored tip.
+        </p>
+        <div id="copyAddressMsg"></div>
+      </div>
+
       <button class="btn btn-primary btn-block" id="sendBtn" type="button" hidden>Send tip</button>
       <div id="tipMsg"></div>
     </div>

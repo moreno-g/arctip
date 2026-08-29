@@ -978,3 +978,65 @@ a:focus-visible, button:focus-visible {
     max-width: 100%;
   }
 }
+
+/* ---------- Funding a passkey wallet ---------- */
+
+/* Sponsorship covers the gas, never the amount, so a wallet created here starts
+   empty. Showing the address in full — copyable, scannable — is what stops that
+   being a dead end. */
+.funding {
+  margin-top: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.funding h3 {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.funding .hint { margin-top: 4px; }
+
+.funding-addr {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 14px;
+}
+.funding-addr code {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--mist-100);
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  /* The address must be readable in full: it is what someone types or checks
+     before sending money. Wrapping beats truncating here. */
+  word-break: break-all;
+}
+.funding-addr .btn { margin-top: 0; flex: none; align-self: flex-start; }
+
+.funding-qr {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+.funding-qr canvas {
+  width: 128px;
+  height: 128px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  flex: none;
+}
+.funding-faucet { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+@media (max-width: 520px) {
+  .funding-addr { flex-direction: column; }
+  .funding-addr .btn { align-self: stretch; min-height: 44px; }
+  .funding-qr { flex-direction: column; align-items: flex-start; }
+}

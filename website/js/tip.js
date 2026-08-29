@@ -41,6 +41,11 @@
   const payerBalance = document.getElementById("payerBalance");
   const gasRow = document.getElementById("gasRow");
   const switchWalletBtn = document.getElementById("switchWalletBtn");
+  const fundingPanel = document.getElementById("fundingPanel");
+  const fundingAddress = document.getElementById("fundingAddress");
+  const fundingQr = document.getElementById("fundingQr");
+  const copyAddressBtn = document.getElementById("copyAddressBtn");
+  const copyAddressMsg = document.getElementById("copyAddressMsg");
 
   const readContractPromise = getReadOnlyContract();
 
@@ -189,30 +194,126 @@
     refreshAffordability();
   }
 
+  // The QR library is only needed once a wallet turns out to be short of funds,
+  // which is not the common case — so it is fetched then, not on page load.
+  let qrLoader = null;
+  function loadQrLib() {
+    if (window.qrcode) return Promise.resolve();
+    if (qrLoader) return qrLoader;
+    qrLoader = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "vendor/qrcode.min.js";
+      s.onload = resolve;
+      s.onerror = () => { qrLoader = null; reject(new Error("qr")); };
+      document.head.appendChild(s);
+    });
+    return qrLoader;
+  }
+
+  const QR_QUIET_ZONE = 4; // modules of margin — scanners fail without it
+
+  async function drawFundingQr(text) {
+    try {
+      await loadQrLib();
+      const qr = qrcode(0, "M");
+      qr.addData(text);
+      qr.make();
+      const count = qr.getModuleCount();
+      const total = count + QR_QUIET_ZONE * 2;
+      const scale = Math.max(2, Math.floor(256 / total));
+      const dim = scale * total;
+      fundingQr.width = dim;
+      fundingQr.height = dim;
+      const ctx = fundingQr.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, dim, dim);
+      ctx.fillStyle = "#14264A";
+      for (let r = 0; r < count; r++) {
+        for (let c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) {
+            ctx.fillRect((c + QR_QUIET_ZONE) * scale, (r + QR_QUIET_ZONE) * scale, scale, scale);
+          }
+        }
+      }
+    } catch {
+      // The address and its copy button carry the panel on their own.
+      fundingQr.closest(".funding-qr").hidden = true;
+    }
+  }
+
+  /// Show how to fund the wallet, but only when it actually needs funding —
+  /// a panel that is always there is noise on the page that matters most.
+  let fundingShownFor = null;
+
+  async function showFunding(show) {
+    fundingPanel.hidden = !show;
+    if (!show || fundingShownFor === state.address) return;
+    fundingShownFor = state.address;
+    fundingAddress.textContent = state.address;
+    await drawFundingQr(state.address);
+  }
+
+  if (copyAddressBtn) {
+    copyAddressBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(state.address);
+        copyAddressMsg.replaceChildren();
+        const box = document.createElement("div");
+        box.className = "state-msg success";
+        box.textContent = "Address copied.";
+        copyAddressMsg.appendChild(box);
+        setTimeout(() => copyAddressMsg.replaceChildren(), 2500);
+      } catch {
+        copyAddressMsg.replaceChildren();
+        const box = document.createElement("div");
+        box.className = "state-msg error";
+        box.textContent = "Couldn't copy — select the address above instead.";
+        copyAddressMsg.appendChild(box);
+      }
+    });
+  }
+
   /// Warn before the wallet prompt, not after it fails. A sponsored tip needs
   /// the amount and nothing more; an unsponsored one needs a little over, for
   /// gas the fan pays themselves.
   function refreshAffordability() {
-    if (!state.address || currentBalance === null || !selectedAmount) {
-      if (state.address) showMsg("", "");
+    if (!state.address || currentBalance === null) {
+      showFunding(false);
       return;
     }
+
+    // An empty wallet needs funding whatever amount is picked — say so straight
+    // away rather than waiting for the fan to choose before telling them.
+    if (currentBalance === 0n) {
+      showMsg("", "");
+      showFunding(true);
+      return;
+    }
+
+    if (!selectedAmount) {
+      showMsg("", "");
+      showFunding(false);
+      return;
+    }
+
     let needed;
     try {
       needed = ethers.parseEther(selectedAmount);
     } catch {
       return;
     }
+
     if (currentBalance < needed) {
       const short = ethers.formatEther(needed - currentBalance);
       showMsg(
         `This wallet holds ${Number(ethers.formatEther(currentBalance)).toFixed(2)} USDC — ` +
-          `${Number(short).toFixed(2)} short of a ${selectedAmount} USDC tip. ` +
-          `Send USDC to ${state.address} on Arc, then try again.`,
+          `${Number(short).toFixed(2)} short of a ${selectedAmount} USDC tip.`,
         "info"
       );
+      showFunding(true);
     } else {
       showMsg("", "");
+      showFunding(false);
     }
   }
 
@@ -271,6 +372,8 @@
     if (state.mode === "passkey") ArcTipPasskey.forget();
     state = { mode: null, signer: null, address: null, quotedFeeBps: state.quotedFeeBps };
     currentBalance = null;
+    fundingShownFor = null;
+    fundingPanel.hidden = true;
     walletSummary.hidden = true;
     payWith.hidden = false;
     walletChip.replaceChildren();
