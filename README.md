@@ -104,7 +104,7 @@ Arc testnet is CCTP domain **26**; there is no published Arc mainnet domain yet.
 |---|---|
 | Network | Arc Testnet (chain `5042002`) |
 | TipJar | [`0x9BE91953aE20c079F8Ad932Ef6CF812f80aD217a`](https://testnet.arcscan.app/address/0x9BE91953aE20c079F8Ad932Ef6CF812f80aD217a) |
-| ArcTipPaymaster | not yet deployed |
+| ArcTipPaymaster | [`0x45E349F2977fB9eD9E4ae947ff8d98Db9002DcC8`](https://testnet.arcscan.app/address/0x45E349F2977fB9eD9E4ae947ff8d98Db9002DcC8) |
 | EntryPoint (v0.7) | `0x0000000071727De22E5E9d8BAf0edAc6f37da032` — confirmed live on Arc |
 | Fee | 1% |
 

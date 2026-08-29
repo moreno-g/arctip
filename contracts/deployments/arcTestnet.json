@@ -12,5 +12,20 @@
   "feeBps": 200,
   "deployedAt": "2026-07-25",
   "supersedes": "0xb2f2DB422756b139E0627744176b137E23FdA30a",
-  "notes": "v2: owner and treasury set at construction so the deployer key never held admin rights. Adds maxFeeBps slippage guard, on-chain handle validation, one handle per address, transferHandle, a pending-withdrawal fallback so a rejecting recipient cannot brick tips, a 280-char message cap, and readable handle/tip/volume counters. Known accepted risk: register() is front-runnable."
+  "notes": "v2: owner and treasury set at construction so the deployer key never held admin rights. Adds maxFeeBps slippage guard, on-chain handle validation, one handle per address, transferHandle, a pending-withdrawal fallback so a rejecting recipient cannot brick tips, a 280-char message cap, and readable handle/tip/volume counters. Known accepted risk: register() is front-runnable.",
+  "paymaster": {
+    "contract": "ArcTipPaymaster",
+    "address": "0x45E349F2977fB9eD9E4ae947ff8d98Db9002DcC8",
+    "entryPoint": "0x0000000071727De22E5E9d8BAf0edAc6f37da032",
+    "entryPointVersion": "v0.7",
+    "owner": "0x7De8aa2aDDa8D9A5565e75C5B89C7836c3Cb8e1f",
+    "ownershipAccepted": false,
+    "stake": "0.1",
+    "unstakeDelaySec": 86400,
+    "initialDeposit": "1.0",
+    "minSponsoredTip": "1.0",
+    "maxCostPerOp": "0.05",
+    "deployedAt": "2026-08-29",
+    "notes": "Sponsors only execute->TipJar.tip above the floor; refuses register, which is free to call. Staked because it reads its own storage during validation, which ERC-7562 requires. Fees only fund it once TipJar's owner points setTreasury at this address."
+  }
 }

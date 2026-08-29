@@ -48,6 +48,8 @@ node tools/circle-bundle/build.js   # régénère website/vendor/circle-passkey.
 
 À ne pas re-deviner — mesurés sur le testnet, pas lus dans une doc :
 
+- **ArcTipPaymaster déployé** : `0x45E349F2977fB9eD9E4ae947ff8d98Db9002DcC8`, staké (0,1 USDC, délai 24 h),
+  dépôt initial 1 USDC, plancher 1 USDC. Owner offert à `0x7De8…` — reste à accepter.
 - **EntryPoints ERC-4337 v0.6, v0.7 et v0.8 : tous déployés.** v0.7 =
   `0x0000000071727De22E5E9d8BAf0edAc6f37da032`.
 - **Aucune précompile P-256** (ni `0x100` ni `0x0b`) → vérifier une signature WebAuthn nous-mêmes

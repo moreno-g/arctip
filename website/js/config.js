@@ -16,10 +16,10 @@ const TIPJAR_ADDRESS = "0x9BE91953aE20c079F8Ad932Ef6CF812f80aD217a";
 // --- Sponsored gas & passkey wallets ---
 
 // ArcTipPaymaster. Sponsors the gas for tips so a fan never needs a gas balance
-// to support someone; funded on-chain by the tip fees themselves. Empty until
-// deployed, in which case the fan simply pays their own gas — on Arc, where
-// USDC is the gas asset, anyone holding USDC already can.
-const PAYMASTER_ADDRESS = "";
+// to support someone; funded on-chain by the tip fees themselves. Only tips at
+// or above its 1 USDC floor are sponsored — under that a fan pays their own gas,
+// which on Arc, where USDC is the gas asset, anyone holding USDC already can.
+const PAYMASTER_ADDRESS = "0x45E349F2977fB9eD9E4ae947ff8d98Db9002DcC8";
 
 // Circle Modular Wallets. The client key is a public, domain-restricted key
 // meant to ship in front-end code — it is not a secret, and there is no server
