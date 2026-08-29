@@ -1,0 +1,87 @@
+<!doctype html>
+<!--
+  Source de la bannière X (1500×500). Le PNG à côté en est le rendu.
+
+  Committer une image sans sa source, c'est garantir qu'il faudra tout refaire
+  à la prochaine retouche — c'est ce qui s'est passé pour la bannière
+  précédente, dont aucune source n'existait quand le domaine a changé.
+
+  Pour régénérer :
+    npm start                      (sert website/ sur 8080, pour les polices)
+    ouvrir ce fichier via ce serveur, puis dans la console :
+      copy(document.getElementById('c').toDataURL('image/png'))
+    ou faire un POST du dataURL vers un récepteur local.
+
+  Les polices viennent de website/fonts/ — chemin relatif depuis website/.
+-->
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family:"Space Grotesk"; font-weight:400; src:url("../website/fonts/space-grotesk-400.woff2") format("woff2"); }
+  @font-face { font-family:"DM Sans"; font-weight:400; src:url("../website/fonts/dm-sans-400.woff2") format("woff2"); }
+  @font-face { font-family:"Space Mono"; font-weight:400; src:url("../website/fonts/space-mono-400.woff2") format("woff2"); }
+  body { margin:0; background:#222; }
+  canvas { display:block; }
+</style></head>
+<body>
+<canvas id="c" width="1500" height="500"></canvas>
+<script>
+window.bannerReady = false;
+document.fonts.ready.then(async () => {
+  await Promise.all([
+    document.fonts.load('400 59px "Space Grotesk"'),
+    document.fonts.load('400 25px "DM Sans"'),
+    document.fonts.load('400 26px "Space Mono"'),
+  ]);
+
+  const c = document.getElementById('c');
+  const x = c.getContext('2d');
+  const W = 1500, H = 500;
+
+  x.fillStyle = '#14264A';
+  x.fillRect(0, 0, W, H);
+
+  // L'arc de la marque : centre hors cadre à droite, seul son bord gauche entre.
+  x.save();
+  x.strokeStyle = '#8A6A35';
+  x.lineWidth = 18;
+  x.beginPath();
+  x.arc(1680, H / 2, 410, 0, Math.PI * 2);
+  x.stroke();
+  x.restore();
+
+  // Filet doré en haut, qui s'estompe vers la droite.
+  const g = x.createLinearGradient(0, 0, W, 0);
+  g.addColorStop(0, '#C9832A');
+  g.addColorStop(0.22, '#C9832A');
+  g.addColorStop(1, 'rgba(201,131,42,0)');
+  x.fillStyle = g;
+  x.fillRect(0, 0, W, 5);
+
+  // Le texte reste dans la zone centrale : la photo de profil recouvre le coin
+  // inférieur gauche, et X rogne les bords selon la largeur d'affichage.
+  const L = 440;
+  x.textBaseline = 'alphabetic';
+
+  x.font = '400 59px "Space Grotesk", sans-serif';
+  x.letterSpacing = '-1.4px';
+  x.fillStyle = '#ffffff';
+  x.fillText('Instant USDC tips for creators', L, 232);
+  x.letterSpacing = '0px';
+
+  x.font = '400 25px "DM Sans", sans-serif';
+  x.fillStyle = '#B9C3D6';
+  x.fillText('One link in your bio. Settled on Arc in about a second.', L, 283);
+
+  x.fillStyle = 'rgba(255,255,255,.17)';
+  x.fillRect(L, 328, 800, 1);
+
+  x.font = '400 26px "Space Mono", monospace';
+  x.letterSpacing = '0.5px';
+  x.fillStyle = '#ffffff';
+  x.fillText('arctip.app', L, 384);
+
+  window.bannerPng = c.toDataURL('image/png');
+  window.bannerReady = true;
+});
+</script>
+</body></html>
