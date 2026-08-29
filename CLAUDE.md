@@ -86,10 +86,20 @@ en ligne dérive du dépôt dès qu'on oublie la commande.
 
 | | |
 |---|---|
-| Team Vercel | `moreno-g` |
-| Projet | `arctip` (`prj_nZkqNAvpixOazDItfo24GnmNf8Ay`) |
-| URL en ligne | `arctip-psi.vercel.app` |
-| Domaine visé | `arctip.app` |
+| Domaine | `arctip.app` — registrar **Namecheap**, DNS **Namecheap** |
+| Hébergement | Vercel, team `moreno-g`, projet `arctip` |
+| URL de secours | `arctip-psi.vercel.app` |
+
+Le DNS reste **délibérément chez Namecheap** plutôt que délégué à Vercel : deux
+enregistrements y pointent vers l'hébergeur (`A @ → 76.76.21.21` et
+`CNAME www → cname.vercel-dns.com`). C'est la leçon d'`arctip.xyz` — domaine, DNS et
+hébergement sur un même compte, c'est un point unique de défaillance. Ici, un compte Vercel
+perdu ne coûterait qu'un redéploiement ailleurs et deux lignes de DNS à changer.
+
+⚠️ **Déployer depuis une copie sans `.git`.** Sur le plan Hobby, Vercel bloque
+(`readyState: BLOCKED`, message trompeur « Not authorized ») quand il n'arrive pas à
+rattacher l'auteur des commits au propriétaire du compte — ce qui est le cas ici. Le
+contournement est de copier `website/` hors du dépôt et de déployer de là.
 
 ⚠️ **`arctip.xyz` est perdu, et affiche encore la section `$TIP`.** Le domaine a été acheté le
 25 juillet 2026 via un compte Vercel (`team_p04BXb25…`) dont l'identifiant n'a pas été retrouvé.

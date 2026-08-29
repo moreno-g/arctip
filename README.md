@@ -138,6 +138,11 @@ Because it is manual, the live site drifts behind the repo whenever the command
 is forgotten. It has done so before, and expensively: the `$TIP` section was
 removed from the repo and stayed live for months afterwards.
 
+The domain is registered at **Namecheap**, and its DNS stays there rather than
+being delegated to Vercel — two records point at the host (`A @ → 76.76.21.21`,
+`CNAME www → cname.vercel-dns.com`). Keeping registrar, DNS and hosting on
+separate accounts is deliberate; see below for why.
+
 **`arctip.xyz` is lost.** It was bought on 25 July 2026 through a Vercel account
 whose login could not be recovered; the domain, its DNS and the original project
 all live there, so the old page — `$TIP` section included — cannot be corrected
