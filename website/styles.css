@@ -928,3 +928,16 @@ a:focus-visible, button:focus-visible {
   cursor: pointer;
 }
 .btn-link:hover { color: var(--ink); }
+
+/* Message length counter. The contract caps the note at 280 *bytes*, and a
+   browser maxlength counts UTF-16 units — so an accented or emoji-heavy note
+   passes the field and then reverts on-chain, after the fan has signed and
+   paid gas. This counts what the contract counts. */
+.char-count {
+  margin: 6px 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--slate-400);
+  text-align: right;
+}
+.char-count.is-over { color: #8C1D18; font-weight: 700; }

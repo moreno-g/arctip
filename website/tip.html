@@ -65,7 +65,8 @@
 
       <div class="field">
         <label for="messageInput">Message (optional, public)</label>
-        <textarea id="messageInput" maxlength="280" placeholder="Say something nice…"></textarea>
+        <textarea id="messageInput" placeholder="Say something nice…" aria-describedby="messageCount"></textarea>
+        <p class="char-count" id="messageCount" aria-live="polite">280 left</p>
       </div>
 
       <div class="pay-with" id="payWith">

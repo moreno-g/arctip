@@ -20,6 +20,7 @@
   const customField = document.getElementById("customAmountField");
   const customInput = document.getElementById("customAmountInput");
   const messageInput = document.getElementById("messageInput");
+  const messageCount = document.getElementById("messageCount");
   const sendBtn = document.getElementById("sendBtn");
   const tipMsg = document.getElementById("tipMsg");
   const walletChip = document.getElementById("walletChip");
@@ -51,6 +52,24 @@
   // operation through the paymaster, "injected" is an ordinary transaction the
   // fan pays gas for themselves.
   let state = { mode: null, signer: null, address: null, quotedFeeBps: null };
+
+  // The contract caps the note at 280 BYTES (`bytes(message).length`), while a
+  // textarea's maxlength counts UTF-16 units. A note in French with accents, or
+  // with a handful of emoji, clears the field and then reverts on-chain — after
+  // the fan has signed and paid the gas. So count what the contract counts.
+  const MAX_MESSAGE_BYTES = 280;
+  const byteLength = (text) => new TextEncoder().encode(text).length;
+
+  function refreshMessageCount() {
+    const used = byteLength(messageInput.value);
+    const left = MAX_MESSAGE_BYTES - used;
+    const over = left < 0;
+    messageCount.textContent = over ? `${-left} over the limit` : `${left} left`;
+    messageCount.classList.toggle("is-over", over);
+    return !over;
+  }
+
+  messageInput.addEventListener("input", refreshMessageCount);
 
   // Kept as the raw string the user typed. Going through Number() and back turns
   // 0.0000001 into "1e-7", which parseEther rejects outright, and silently
@@ -322,6 +341,14 @@
       showMsg("Choose how you want to pay first.", "error");
       return;
     }
+    if (!refreshMessageCount()) {
+      showMsg(
+        `Your message is ${byteLength(messageInput.value) - MAX_MESSAGE_BYTES} over the limit. ` +
+          "Accents and emoji each take more than one character's room.",
+        "error"
+      );
+      return;
+    }
 
     sendBtn.disabled = true;
     const msgText = messageInput.value.trim();
@@ -382,6 +409,7 @@
     customField.style.display = "none";
     customInput.value = "";
     messageInput.value = "";
+    refreshMessageCount();
     selectedAmount = null;
     showMsg("", "");
     // The tip just left this wallet, so the balance on screen is stale.
