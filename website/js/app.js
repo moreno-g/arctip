@@ -272,22 +272,6 @@
   const passkeyCreateBtn = document.getElementById("passkeyCreateBtn");
   const passkeySignInBtn = document.getElementById("passkeySignInBtn");
   const passkeyHint = document.getElementById("passkeyHint");
-  const webhookInput = document.getElementById("webhookInput");
-  const saveWebhookBtn = document.getElementById("saveWebhookBtn");
-  const webhookMsg = document.getElementById("webhookMsg");
-
-  if (webhookInput && saveWebhookBtn) {
-    webhookInput.value = typeof ArcTipNotifications !== "undefined" ? ArcTipNotifications.getWebhookUrl() : "";
-    saveWebhookBtn.addEventListener("click", () => {
-      const url = webhookInput.value.trim();
-      if (typeof ArcTipNotifications !== "undefined") {
-        ArcTipNotifications.setWebhookUrl(url);
-        showMsg(webhookMsg, url ? "Webhook URL saved!" : "Webhook URL cleared.", "success");
-        setTimeout(() => showMsg(webhookMsg, "", ""), 3000);
-      }
-    });
-  }
-
   if (copyHtmlSnippetBtn) {
     copyHtmlSnippetBtn.addEventListener("click", async () => {
       const htmlSnippetEl = document.getElementById("htmlSnippetCode");

@@ -492,15 +492,6 @@
         txHash = (await tx.wait()).hash;
       }
 
-      if (typeof ArcTipNotifications !== "undefined") {
-        ArcTipNotifications.notifyTip({
-          handle,
-          sender: state.address,
-          amountUsdc: selectedAmount,
-          message: msgText,
-          txHash,
-        });
-      }
 
       receiptHandle.textContent = `@${handle}`;
       receiptAmount.textContent = `${selectedAmount} USDC`;
