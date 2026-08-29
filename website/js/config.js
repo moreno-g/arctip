@@ -25,7 +25,7 @@ const PAYMASTER_ADDRESS = "";
 // meant to ship in front-end code — it is not a secret, and there is no server
 // here to hide one behind. Passkey sign-in stays hidden until this is filled in.
 const CIRCLE_WALLETS = {
-  clientKey: "",
+  clientKey: "TEST_CLIENT_KEY:746eab65a771af2e9dfca0bbd8d62cdf:95a33143424cd3d25df9bb1b9718f7f9",
   clientUrl: "https://modular-sdk.circle.com/v1/rpc/w3s/buidl",
   chainPath: "arcTestnet",
   tipJarAddress: TIPJAR_ADDRESS,
