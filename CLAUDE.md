@@ -68,6 +68,13 @@ node tools/circle-bundle/build.js   # régénère website/vendor/circle-passkey.
 
 ## Pièges
 
+- ⚠️ **Le `TipJar` déployé n'expose pas la même signature que `TipJar.sol` aujourd'hui.** Il a
+  `setFeeBps(uint256)` (`0x72c27b62`), la source a `setFeeBps(uint16)` (`0x023b1fc9`). Le contrat
+  date du 25 juillet, le type a été resserré depuis. Un appel construit depuis la source actuelle
+  échoue en « missing revert data », ce qui ressemble à un problème de droits alors que c'est un
+  sélecteur inexistant. Vérifier la signature contre le bytecode déployé, pas contre le source.
+
+
 - **Le paymaster doit être staké** auprès de l'EntryPoint : il lit son propre storage pendant la
   validation, et ERC-7562 fait rejeter les UserOps d'un paymaster non staké qui le fait.
   `deploy-paymaster.js` s'en charge.

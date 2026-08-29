@@ -21,7 +21,11 @@
     "function treasury() view returns (address)",
     "function owner() view returns (address)",
     "function setTreasury(address)",
-    "function setFeeBps(uint16)",
+    // uint256, not the uint16 in TipJar.sol today. The live contract was
+    // deployed on 25 July, before the type was narrowed, and the selector
+    // differs — 0x72c27b62 against 0x023b1fc9. Matching the source instead of
+    // the deployment is what makes this call revert with "missing revert data".
+    "function setFeeBps(uint256)",
   ];
   const PM_ABI = [
     "function owner() view returns (address)",
