@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "cd contracts && npm test"
+    "test": "cd contracts && npm test",
+    "admin": "python3 -m http.server 4174"
   }
 }

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ArcTip — console d'administration</title>
+<style>
+  :root {
+    --paper:#fff; --ink:#0A0A0A; --slate:#41464C; --slate-400:#676E7C;
+    --mist:#EEF2F5; --line:rgba(10,10,10,.12); --navy:#14264A;
+    --gold:#8C5818; --gold-bright:#C9832A;
+    --ok:#1E5C39; --ok-bg:#E4F0E9; --warn:#7E4F14; --warn-bg:#FBEBD2;
+    --err:#8C1D18; --err-bg:#FBE9E7;
+    --mono:"Space Mono",Menlo,Consolas,monospace;
+    --body:"DM Sans","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px 72px}
+  header{background:var(--navy);color:#fff;padding:32px 0;border-bottom:3px solid var(--gold-bright);margin-bottom:32px}
+  header .wrap{padding-bottom:0}
+  h1{margin:0 0 6px;font-size:1.6rem;font-weight:500}
+  .sub{margin:0;color:#B9C3D6;font-size:.95rem}
+  h2{font-size:1.1rem;margin:32px 0 12px;font-weight:600}
+  .card{border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:14px;background:var(--paper)}
+  .row{display:flex;justify-content:space-between;gap:16px;padding:6px 0;font-size:.92rem}
+  .row .k{color:var(--slate-400)}
+  .row .v{font-family:var(--mono);text-align:right;word-break:break-all}
+  .tag{display:inline-block;padding:3px 9px;border-radius:999px;font-family:var(--mono);
+       font-size:.68rem;text-transform:uppercase;letter-spacing:.05em}
+  .tag.ok{background:var(--ok-bg);color:var(--ok)}
+  .tag.todo{background:var(--warn-bg);color:var(--warn)}
+  .tag.err{background:var(--err-bg);color:var(--err)}
+  button{font:inherit;font-weight:500;padding:11px 18px;border-radius:8px;border:1px solid var(--navy);
+         background:var(--navy);color:#fff;cursor:pointer}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.ghost{background:none;color:var(--navy)}
+  .step{display:grid;grid-template-columns:32px minmax(0,1fr);gap:0 14px;padding:18px 0;border-bottom:1px solid var(--line)}
+  .step:last-child{border-bottom:none}
+  .step .n{font-family:var(--mono);font-weight:700;color:var(--gold)}
+  .step h3{margin:0 0 4px;font-size:1rem;font-weight:600}
+  .step p{margin:0 0 10px;color:var(--slate);font-size:.92rem}
+  .step .act{grid-column:2}
+  .msg{margin-top:10px;padding:10px 12px;border-radius:6px;font-size:.9rem}
+  .msg.ok{background:var(--ok-bg);color:var(--ok)}
+  .msg.err{background:var(--err-bg);color:var(--err)}
+  .msg.info{background:var(--mist);color:var(--slate)}
+  code{font-family:var(--mono);font-size:.86em;background:var(--mist);padding:1px 5px;border-radius:4px}
+  a{color:var(--gold)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Console d'administration</h1>
+  <p class="sub">Outil local — ne jamais déployer. Les appels d'admin exigent le wallet owner.</p>
+</div></header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="row"><span class="k">Wallet connecté</span><span class="v" id="acct">—</span></div>
+    <div class="row"><span class="k">Réseau</span><span class="v" id="net">—</span></div>
+    <div class="row"><span class="k">Owner attendu</span><span class="v" id="expectedOwner">—</span></div>
+    <div style="margin-top:12px"><button id="connect">Connecter le wallet</button></div>
+    <div id="connMsg"></div>
+  </div>
+
+  <h2>État on-chain</h2>
+  <div class="card" id="stateCard">
+    <div class="row"><span class="k">TipJar · feeBps</span><span class="v" id="sFee">—</span></div>
+    <div class="row"><span class="k">TipJar · treasury</span><span class="v" id="sTreasury">—</span></div>
+    <div class="row"><span class="k">Paymaster · owner</span><span class="v" id="sPmOwner">—</span></div>
+    <div class="row"><span class="k">Paymaster · dépôt</span><span class="v" id="sDeposit">—</span></div>
+    <div class="row"><span class="k">Paymaster · frais reçus</span><span class="v" id="sFees">—</span></div>
+    <div class="row"><span class="k">Paymaster · tips sponsorisés</span><span class="v" id="sOps">—</span></div>
+    <div style="margin-top:10px"><button class="ghost" id="refresh">Rafraîchir</button></div>
+  </div>
+
+  <h2>Actions</h2>
+  <div class="card">
+    <div class="step">
+      <span class="n">01</span>
+      <div><h3>Accepter la propriété du paymaster <span class="tag todo" id="t1">à faire</span></h3></div>
+      <div class="act">
+        <p>Ownable2Step : la propriété a été offerte à ton wallet, elle doit être acceptée pour être effective.</p>
+        <button id="b1" disabled>Accepter</button>
+        <div id="m1"></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">02</span>
+      <div><h3>Router les frais vers le paymaster <span class="tag todo" id="t2">à faire</span></h3></div>
+      <div class="act">
+        <p>Sans ça le sponsoring vide son dépôt sans jamais se réalimenter : c'est cet appel qui ferme la boucle d'auto-financement.</p>
+        <button id="b2" disabled>setTreasury(paymaster)</button>
+        <div id="m2"></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="n">03</span>
+      <div><h3>Passer les frais à 1 % <span class="tag todo" id="t3">à faire</span></h3></div>
+      <div class="act">
+        <p>Le site annonce 1 %. Tant que cet appel n'est pas passé, le contrat en prélève 2 %.</p>
+        <button id="b3" disabled>setFeeBps(100)</button>
+        <div id="m3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../../website/vendor/ethers.umd.min.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
