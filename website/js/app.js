@@ -95,36 +95,55 @@
   }
 
   // Recent tips is best-effort: it fails quietly rather than breaking the
-  // dashboard, and never issues an unbounded query — see findOwnHandle for why.
+  // dashboard, and never issues an unbounded query.
   //
-  // Arc produces a block every ~0.52s, so a single 1000-block window covered
-  // barely nine minutes: a creator coming back after lunch saw an empty list,
-  // with no way to tell "no tips" from "not looking far enough". So walk
-  // backwards in chunks instead, stopping as soon as there is enough to show —
-  // which on a handle with activity costs one request, exactly as before.
-  const TIP_CHUNK = 10000;      // ~1.5 hours of blocks per request
-  // Six, not more: a handle with tips stops at the first chunk, but one with
-  // none pays the full walk every time — and today every new creator has none.
-  const TIP_MAX_CHUNKS = 6;     // ~8.7 hours, enough to cover overnight
-  const TIP_TARGET = 10;        // rows worth showing
+  // Arc produces a block every ~0.52s, so the old single 1000-block window
+  // covered nine minutes — a creator back from lunch saw an empty list with no
+  // way to tell "no tips" from "not looking far enough".
+  // eth_getLogs is capped per request, and the cap is the reason the original
+  // window was 1000 blocks — not a choice about coverage. Measured: thirdweb
+  // refuses anything above 1000, Arc's own RPC allows 10000, and config.js puts
+  // thirdweb first. So stay at 1000 and win the range back by asking for many
+  // ranges at once: the chunks are independent, so they go out in parallel and
+  // cost one round trip instead of twenty.
+  const LOG_CHUNK = 1000;       // the hard cap on the RPC actually in use
+  const LOG_BATCH = 20;         // requests in flight at once
+
+  async function scanTips(readContract, filter, latest, maxChunks, target) {
+    const found = [];
+    let to = latest;
+    for (let done = 0; done < maxChunks && found.length < target && to > 0; done += LOG_BATCH) {
+      const ranges = [];
+      for (let i = 0; i < LOG_BATCH && done + i < maxChunks && to > 0; i++) {
+        const from = Math.max(0, to - LOG_CHUNK);
+        ranges.push([from, to]);
+        to = from - 1;
+      }
+      const batches = await Promise.all(
+        ranges.map(([f, t]) => readContract.queryFilter(filter, f, t).catch(() => []))
+      );
+      // ranges walk backwards, so flatten oldest-first
+      for (const b of batches.reverse()) found.unshift(...b);
+    }
+    return found;
+  }
+
+  // Measured against the RPC in use: 60 parallel requests take ~2s and are not
+  // rate-limited. Deeper is possible but every visitor pays for it.
+  const TIP_MAX_CHUNKS = 60;    // ~8.7 hours, enough to cover overnight
+  const TIP_TARGET = 10;
 
   async function loadRecentTips(address) {
     try {
       const readContract = await readContractPromise;
       const provider = readContract.runner.provider;
       const latest = await provider.getBlockNumber();
-      const filter = readContract.filters.Tipped(null, address);
-
-      const found = [];
-      let to = latest;
-      for (let i = 0; i < TIP_MAX_CHUNKS && found.length < TIP_TARGET && to > 0; i++) {
-        const from = Math.max(0, to - TIP_CHUNK);
-        found.unshift(...(await readContract.queryFilter(filter, from, to)));
-        to = from - 1;
-      }
+      const found = await scanTips(
+        readContract, readContract.filters.Tipped(null, address), latest, TIP_MAX_CHUNKS, TIP_TARGET
+      );
 
       if (found.length === 0) {
-        const hours = Math.round((TIP_CHUNK * TIP_MAX_CHUNKS * 0.52) / 3600);
+        const hours = ((TIP_MAX_CHUNKS * LOG_CHUNK * 0.52) / 3600).toFixed(1);
         tipList.replaceChildren(
           hintNode(`No tips in the last ${hours} hours — they'll show up here as they arrive.`)
         );
@@ -483,7 +502,7 @@
 
   async function setUpShareActions(link) {
     const q = (s) => encodeURIComponent(s);
-    shareXLink.href = `https://twitter.com/intent/tweet?text=${q(SHARE_TEXT)}&url=${q(link)}`;
+    shareXLink.href = `https://x.com/intent/tweet?text=${q(SHARE_TEXT)}&url=${q(link)}`;
     shareTgLink.href = `https://t.me/share/url?url=${q(link)}&text=${q(SHARE_TEXT)}`;
 
     shareCardBtn.hidden = !(await canShareCardFile());

@@ -46,6 +46,11 @@
   const fundingQr = document.getElementById("fundingQr");
   const copyAddressBtn = document.getElementById("copyAddressBtn");
   const copyAddressMsg = document.getElementById("copyAddressMsg");
+  const supportersEl = document.getElementById("supporters");
+  const supportersList = document.getElementById("supportersList");
+  const supportersNote = document.getElementById("supportersNote");
+  const tabRecent = document.getElementById("tabRecent");
+  const tabTop = document.getElementById("tabTop");
 
   const readContractPromise = getReadOnlyContract();
 
@@ -397,6 +402,165 @@
     return err.message || "Something went wrong setting up your wallet.";
   }
 
+  // ---- Supporters ----
+  //
+  // People tip to be seen doing it. Every ingredient is already on-chain in the
+  // Tipped events, so this issues nothing and distributes nothing — it makes
+  // visible what the chain already records.
+  //
+  // The contract is 36 days old and Arc produces a block every ~0.52s, so the
+  // full history is ~5.9M blocks: 593 requests. Out of the question from a
+  // browser. The window is therefore bounded, and the label says so rather than
+  // implying these are all the supporters there have ever been.
+  // eth_getLogs is capped per request: thirdweb (first in config.js) refuses
+  // anything above 1000 blocks, Arc's own RPC allows 10000. So stay at 1000 and
+  // win the range back by asking for many ranges at once — the chunks are
+  // independent, so they cost one round trip rather than thirty.
+  const LOG_CHUNK = 1000;
+  const LOG_BATCH = 20;        // measured: 6 waves of 10 took ~9s in-browser
+  const SUP_MAX_CHUNKS = 60;    // ~8.7 hours — measured at ~2s, no rate limit
+  const SUP_TARGET = 25;        // enough to rank meaningfully
+  const BLOCK_SECONDS = 0.52;
+
+  let supporters = [];          // { sender, amount, message, block }
+  let supportersView = "recent";
+
+  function ago(blocksBack) {
+    const s = blocksBack * BLOCK_SECONDS;
+    if (s < 90) return "just now";
+    if (s < 5400) return `${Math.round(s / 60)} min ago`;
+    return `${Math.round(s / 3600)} h ago`;
+  }
+
+  function supporterRow({ sender, amount, message, block }, latest, extra) {
+    const row = document.createElement("div");
+    row.className = "supporter";
+
+    const who = document.createElement("span");
+    who.className = "who";
+    if (extra && extra.rank) {
+      const r = document.createElement("span");
+      r.className = "rank";
+      r.textContent = extra.rank;
+      who.appendChild(r);
+    }
+    who.appendChild(document.createTextNode(shortAddress(sender)));
+    if (extra && extra.badge) {
+      const b = document.createElement("span");
+      b.className = "badge";
+      b.textContent = extra.badge;
+      who.appendChild(b);
+    }
+
+    const amt = document.createElement("span");
+    amt.className = "amt";
+    amt.textContent = `${Number(ethers.formatEther(amount)).toFixed(2)} USDC`;
+
+    row.append(who, amt);
+
+    // The note is written by a stranger: textContent, never innerHTML.
+    if (message) {
+      const note = document.createElement("p");
+      note.className = "note";
+      note.textContent = `“${message}”`;
+      row.appendChild(note);
+    }
+    if (block != null) {
+      const when = document.createElement("span");
+      when.className = "when";
+      when.textContent = ago(latest - block);
+      row.appendChild(when);
+    }
+    return row;
+  }
+
+  function renderSupporters(latest) {
+    if (supporters.length === 0) return;
+
+    if (supportersView === "recent") {
+      const rows = supporters.slice(-12).reverse();
+      // Seniority that cannot be bought — the earliest tip in what we can see.
+      const earliest = supporters.reduce((a, b) => (a.block <= b.block ? a : b));
+      supportersList.replaceChildren(
+        ...rows.map((t) =>
+          supporterRow(t, latest, t === earliest ? { badge: "earliest here" } : null)
+        )
+      );
+    } else {
+      // Ranked by total given, which is the number a supporter can move.
+      const totals = new Map();
+      for (const t of supporters) {
+        const key = t.sender.toLowerCase();
+        const cur = totals.get(key) || { sender: t.sender, amount: 0n, block: t.block, message: "" };
+        cur.amount += t.amount;
+        cur.block = Math.min(cur.block, t.block);
+        totals.set(key, cur);
+      }
+      const ranked = [...totals.values()].sort((a, b) => (b.amount > a.amount ? 1 : -1)).slice(0, 10);
+      supportersList.replaceChildren(
+        ...ranked.map((t, i) => supporterRow(t, latest, { rank: `#${i + 1}` }))
+      );
+    }
+  }
+
+  /// Loaded after the tip form is usable: this is the page where someone is
+  /// about to pay, and it must not wait on a log scan to become interactive.
+  async function loadSupporters(recipient) {
+    try {
+      const readContract = await readContractPromise;
+      const provider = readContract.runner.provider;
+      const latest = await provider.getBlockNumber();
+      const filter = readContract.filters.Tipped(null, recipient);
+
+      const found = [];
+      let to = latest;
+      for (let done = 0; done < SUP_MAX_CHUNKS && found.length < SUP_TARGET && to > 0; done += LOG_BATCH) {
+        const ranges = [];
+        for (let i = 0; i < LOG_BATCH && done + i < SUP_MAX_CHUNKS && to > 0; i++) {
+          const from = Math.max(0, to - LOG_CHUNK);
+          ranges.push([from, to]);
+          to = from - 1;
+        }
+        const batches = await Promise.all(
+          ranges.map(([f, t]) => readContract.queryFilter(filter, f, t).catch(() => []))
+        );
+        for (const b of batches.reverse()) {
+          found.unshift(...b.map((e) => ({
+            sender: e.args.sender,
+            amount: e.args.amount,
+            message: e.args.message,
+            block: e.blockNumber,
+          })));
+        }
+      }
+      if (found.length === 0) return;
+
+      supporters = found;
+      supportersEl.hidden = false;
+      renderSupporters(latest);
+
+      const hours = ((SUP_MAX_CHUNKS * LOG_CHUNK * BLOCK_SECONDS) / 3600).toFixed(1);
+      supportersNote.textContent =
+        `Read straight from the chain — the last ${hours} hours of tips to this handle. ` +
+        `Nothing here is issued or awarded: it is what the Tipped events already say.`;
+
+      tabRecent.addEventListener("click", () => {
+        supportersView = "recent";
+        tabRecent.classList.add("is-on"); tabTop.classList.remove("is-on");
+        renderSupporters(latest);
+      });
+      tabTop.addEventListener("click", () => {
+        supportersView = "top";
+        tabTop.classList.add("is-on"); tabRecent.classList.remove("is-on");
+        renderSupporters(latest);
+      });
+    } catch (err) {
+      // Best-effort: the tip form is the page's job, this is decoration. But a
+      // silent catch here cost an hour of debugging once — leave a trace.
+      console.debug("supporters:", err);
+    }
+  }
+
   async function init() {
     if (!handle) {
       handleTitle.textContent = "No handle in this link";
@@ -426,6 +590,9 @@
       recipientExplorer.href = `${ARC_TESTNET.blockExplorerUrls[0]}/address/${owner}`;
 
       tipCard.style.display = "block";
+
+      // After the form is usable, never before it.
+      loadSupporters(owner);
 
       // Silent: rebuilding a wallet from a credential already on this device
       // needs no biometric prompt, so a returning fan lands straight on Send.

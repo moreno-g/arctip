@@ -1061,3 +1061,83 @@ a:focus-visible, button:focus-visible {
     50%      { opacity: 1;   transform: scale(1); }
   }
 }
+
+/* ---------- Supporters ---------- */
+
+/* People tip to be seen doing it — Twitch built alerts on that, Ko-fi a wall.
+   Everything here is read from Tipped events: nothing is issued, nothing is
+   distributed, and none of it costs the project anything to run. */
+.supporters { margin-top: 28px; }
+.supporters-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.supporters h2 { margin: 0; }
+.supporters-tabs { display: flex; gap: 6px; }
+.tab {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 6px 13px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--slate-600);
+  cursor: pointer;
+}
+.tab.is-on { background: var(--navy-900); border-color: var(--navy-900); color: #fff; }
+.tab:focus-visible { outline: 2px solid var(--gold-500); outline-offset: 2px; }
+
+.supporter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+.supporter:last-of-type { border-bottom: none; }
+.supporter .who {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.supporter .amt {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+/* The message is written by whoever sent the tip — rendered with textContent. */
+.supporter .note {
+  grid-column: 1 / -1;
+  color: var(--slate-600);
+  font-size: 0.92rem;
+  overflow-wrap: anywhere;
+}
+.supporter .when { grid-column: 1 / -1; font-size: 0.78rem; color: var(--slate-400); }
+
+/* Seniority that cannot be bought: the block number is the proof. */
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--gold-100);
+  color: var(--gold-700);
+  white-space: nowrap;
+}
+.rank {
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  color: var(--gold-700);
+  font-weight: 700;
+}

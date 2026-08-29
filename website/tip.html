@@ -17,7 +17,7 @@
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@Arctipxyz" />
+  <meta name="twitter:site" content="@Arctipapp" />
   <meta name="twitter:title" content="Send a tip — instant USDC on Arc" />
   <meta name="twitter:description" content="One tap, settled in about a second. No wallet tutorial, no unpredictable fees." />
   <meta name="twitter:image" content="https://arctip.app/og.png" />
@@ -130,6 +130,20 @@
       <div id="tipMsg"></div>
     </div>
 
+    <!-- People tip to be seen doing it. Everything below is already on-chain in
+         Tipped events — nothing is issued, nothing is distributed. -->
+    <section class="supporters" id="supporters" hidden>
+      <div class="supporters-head">
+        <h2>Supporters</h2>
+        <div class="supporters-tabs" role="tablist">
+          <button class="tab is-on" id="tabRecent" role="tab" type="button">Recent</button>
+          <button class="tab" id="tabTop" role="tab" type="button">Top</button>
+        </div>
+      </div>
+      <div id="supportersList"></div>
+      <p class="hint" id="supportersNote"></p>
+    </section>
+
     <div class="card" id="receiptCard" style="display:none;">
       <h2>Tip sent</h2>
       <div class="tx-body" style="padding:0; margin-top:10px;">
@@ -147,7 +161,7 @@
     <div class="wrap">
       <span class="fine">ArcTip is an independent project built on Arc — not affiliated with Circle. Arc is currently on testnet.</span>
       <div class="social">
-        <a href="https://x.com/Arctipxyz" target="_blank" rel="noopener">X / Twitter</a>
+        <a href="https://x.com/Arctipapp" target="_blank" rel="noopener">X / Twitter</a>
       </div>
     </div>
   </footer>
