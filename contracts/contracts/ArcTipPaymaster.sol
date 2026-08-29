@@ -30,16 +30,23 @@ import {
 ///
 ///      The economics are measured, not assumed. On Arc testnet at the observed
 ///      21 gwei, a tip costs ~66k gas on its own and ~186k sponsored through
-///      ERC-4337 — about 0.0039 USDC. The 2% fee on a 1 USDC tip is 0.02 USDC,
-///      roughly 5x the gas it pays for. Below ~0.196 USDC the fee stops covering
-///      the gas, which is where `minSponsoredTip` comes from. Under that floor a
-///      fan simply pays their own gas, which on Arc they can already do.
+///      ERC-4337 — about 0.0039 USDC. The fee is deliberately set to cover that
+///      and little else: at 1%, a 1 USDC tip yields 0.01 USDC against 0.0039 of
+///      gas, 2.6x cover. Break-even sits at 0.39 USDC, and the floor is set at
+///      1 USDC so the margin survives gas rising two and a half times before any
+///      sponsored tip runs at a loss. Under the floor a fan pays their own gas,
+///      which on Arc they can already do.
+///
+///      Fees are charged on every tip, but only tips from passkey wallets are
+///      sponsored — one sent from a browser wallet pays the fee and costs us
+///      nothing. Real cover is therefore better than these figures, which are
+///      the worst case.
 ///
 ///      That floor is also the anti-drain measure. Sponsorship is open to
 ///      anyone, so it has to survive someone tipping their own handle in a loop:
-///      each round trip costs the attacker the 2% fee and costs us less than
-///      that in gas, so the loop drains the attacker first. Griefing us means
-///      paying more than we lose.
+///      each round trip costs the attacker the fee and costs us less than that
+///      in gas, so the loop drains the attacker first. Griefing us means paying
+///      more than we lose.
 contract ArcTipPaymaster is IPaymaster, Ownable2Step, Pausable {
     /// @dev The v0.7 singleton, identical on every chain and confirmed deployed
     ///      on Arc testnet. Immutable: a paymaster that could be repointed at an
@@ -55,7 +62,7 @@ contract ArcTipPaymaster is IPaymaster, Ownable2Step, Pausable {
 
     /// @notice Smallest tip that gets its gas sponsored. Below this the fee no
     ///         longer covers the gas — see the note on this contract.
-    uint256 public minSponsoredTip = 0.25 ether;
+    uint256 public minSponsoredTip = 1 ether;
 
     /// @notice Refuses to sponsor a single operation costing more than this, so
     ///         a gas price spike cannot drain the deposit one op at a time.

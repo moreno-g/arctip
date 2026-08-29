@@ -26,9 +26,9 @@ describe("TipJar", () => {
       ).to.be.revertedWithCustomError(TipJar, "ZeroAddress");
     });
 
-    it("starts at 2% with empty counters", async () => {
+    it("starts at 1% with empty counters", async () => {
       const { tipJar } = await deploy();
-      expect(await tipJar.feeBps()).to.equal(200);
+      expect(await tipJar.feeBps()).to.equal(100);
       expect(await tipJar.handleCount()).to.equal(0);
       expect(await tipJar.tipCount()).to.equal(0);
       expect(await tipJar.totalTipped()).to.equal(0);
@@ -117,7 +117,7 @@ describe("TipJar", () => {
       const amount = ethers.parseEther("1");
       await expect(() =>
         tipJar.connect(fan).tip("rowan", "", NO_FEE_LIMIT, { value: amount })
-      ).to.changeEtherBalance(other, (amount * 9800n) / 10000n);
+      ).to.changeEtherBalance(other, (amount * 9900n) / 10000n);
     });
 
     it("frees the old wallet to register again", async () => {
@@ -148,7 +148,7 @@ describe("TipJar", () => {
   });
 
   describe("tip", () => {
-    it("splits between recipient and treasury at the default 2%", async () => {
+    it("splits between recipient and treasury at the default 1%", async () => {
       const { tipJar, creator, fan, treasury } = await deploy();
       await tipJar.connect(creator).register("rowan");
 
@@ -157,7 +157,7 @@ describe("TipJar", () => {
         tipJar.connect(fan).tip("rowan", "nice thread", NO_FEE_LIMIT, { value: amount })
       ).to.changeEtherBalances(
         [fan, creator, treasury],
-        [-amount, (amount * 9800n) / 10000n, (amount * 200n) / 10000n]
+        [-amount, (amount * 9900n) / 10000n, (amount * 100n) / 10000n]
       );
     });
 
@@ -165,7 +165,7 @@ describe("TipJar", () => {
       const { tipJar, creator, fan } = await deploy();
       await tipJar.connect(creator).register("rowan");
       const amount = ethers.parseEther("5");
-      const fee = (amount * 200n) / 10000n;
+      const fee = (amount * 100n) / 10000n;
 
       await expect(tipJar.connect(fan).tip("rowan", "nice", NO_FEE_LIMIT, { value: amount }))
         .to.emit(tipJar, "Tipped")
@@ -179,20 +179,20 @@ describe("TipJar", () => {
       const { tipJar, owner, creator, fan } = await deploy();
       await tipJar.connect(creator).register("rowan");
 
-      // the page quoted 2%; the owner raises to 5% before the fan signs
+      // the page quoted 1%; the owner raises to 5% before the fan signs
       await tipJar.connect(owner).setFeeBps(500);
 
       await expect(
-        tipJar.connect(fan).tip("rowan", "", 200, { value: ethers.parseEther("10") })
+        tipJar.connect(fan).tip("rowan", "", 100, { value: ethers.parseEther("10") })
       )
         .to.be.revertedWithCustomError(tipJar, "FeeAboveMax")
-        .withArgs(500, 200);
+        .withArgs(500, 100);
     });
 
     it("accepts a tip when the fee is at or below the sender's limit", async () => {
       const { tipJar, creator, fan } = await deploy();
       await tipJar.connect(creator).register("rowan");
-      await expect(tipJar.connect(fan).tip("rowan", "", 200, { value: ethers.parseEther("1") })).to
+      await expect(tipJar.connect(fan).tip("rowan", "", 100, { value: ethers.parseEther("1") })).to
         .not.be.reverted;
     });
 
@@ -242,7 +242,7 @@ describe("TipJar", () => {
       await tipJar.connect(asRejector).register("brickme");
 
       const amount = ethers.parseEther("1");
-      const net = (amount * 9800n) / 10000n;
+      const net = (amount * 9900n) / 10000n;
 
       // the tip goes through rather than reverting
       await expect(tipJar.connect(fan).tip("brickme", "", NO_FEE_LIMIT, { value: amount }))
@@ -261,7 +261,7 @@ describe("TipJar", () => {
       await tipJar.connect(creator).register("rowan");
 
       const amount = ethers.parseEther("10");
-      const fee = (amount * 200n) / 10000n;
+      const fee = (amount * 100n) / 10000n;
       await tipJar.connect(fan).tip("rowan", "", NO_FEE_LIMIT, { value: amount });
       expect(await tipJar.pendingWithdrawal(rejectorAddr)).to.equal(fee);
 

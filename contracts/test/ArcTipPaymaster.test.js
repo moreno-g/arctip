@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-const FLOOR = ethers.parseEther("0.25");
+const FLOOR = ethers.parseEther("1"); // minSponsoredTip: covers gas even if it rises 2.5x
 
 // An MSCA routes everything through execute(address,uint256,bytes); the
 // paymaster only ever sees that outer call, so the tests build it by hand.
@@ -36,7 +36,7 @@ describe("ArcTipPaymaster", () => {
   });
 
   function tipCallData(value, handle = "rowan", message = "") {
-    const inner = tipJarIface.encodeFunctionData("tip", [handle, message, 200]);
+    const inner = tipJarIface.encodeFunctionData("tip", [handle, message, 100]);
     return executeIface.encodeFunctionData("execute", [tipJar.target, value, inner]);
   }
 
@@ -100,7 +100,7 @@ describe("ArcTipPaymaster", () => {
     });
 
     it("refuses anything that is not an execute call", async () => {
-      const direct = tipJarIface.encodeFunctionData("tip", ["rowan", "", 200]);
+      const direct = tipJarIface.encodeFunctionData("tip", ["rowan", "", 100]);
       await expect(validate(direct)).to.be.revertedWithCustomError(
         paymaster,
         "NotAnExecuteCall"
@@ -116,7 +116,7 @@ describe("ArcTipPaymaster", () => {
     });
 
     it("refuses an execute aimed somewhere other than the TipJar", async () => {
-      const inner = tipJarIface.encodeFunctionData("tip", ["rowan", "", 200]);
+      const inner = tipJarIface.encodeFunctionData("tip", ["rowan", "", 100]);
       const callData = executeIface.encodeFunctionData("execute", [
         outsider.address,
         ethers.parseEther("1"),
@@ -184,15 +184,15 @@ describe("ArcTipPaymaster", () => {
     });
 
     it("counts fees arriving from the TipJar", async () => {
-      await fan.sendTransaction({ to: paymaster.target, value: ethers.parseEther("0.02") });
-      expect(await paymaster.feesReceived()).to.equal(ethers.parseEther("0.02"));
+      await fan.sendTransaction({ to: paymaster.target, value: ethers.parseEther("0.01") });
+      expect(await paymaster.feesReceived()).to.equal(ethers.parseEther("0.01"));
     });
 
     it("reports coverage in bps once gas has been sponsored", async () => {
-      await fan.sendTransaction({ to: paymaster.target, value: ethers.parseEther("0.02") });
+      await fan.sendTransaction({ to: paymaster.target, value: ethers.parseEther("0.01") });
       await entryPoint.callPostOp(paymaster.target, 0, context(), ethers.parseEther("0.0039"));
-      // 0.02 of fees against 0.0039 of gas — the 5x margin the floor is set from.
-      expect(await paymaster.feeCoverageBps()).to.equal(51282);
+      // 0.01 of fees against 0.0039 of gas — the 2.6x cover the floor is set from.
+      expect(await paymaster.feeCoverageBps()).to.equal(25641);
     });
   });
 
@@ -201,10 +201,10 @@ describe("ArcTipPaymaster", () => {
       // TipJar pays fees out with a 50k gas bound; receive() must fit inside it
       // or fees land in pendingWithdrawal instead of funding sponsorship.
       await tipJar.connect(owner).setTreasury(paymaster.target);
-      const tx = await tipJar.connect(fan).tip("rowan", "", 200, { value: ethers.parseEther("1") });
+      const tx = await tipJar.connect(fan).tip("rowan", "", 100, { value: ethers.parseEther("1") });
       await tx.wait();
 
-      expect(await paymaster.feesReceived()).to.equal(ethers.parseEther("0.02"));
+      expect(await paymaster.feesReceived()).to.equal(ethers.parseEther("0.01"));
       await expect(tipJar.pendingWithdrawal(paymaster.target)).to.eventually.equal(0);
     });
 
@@ -251,7 +251,7 @@ describe("ArcTipPaymaster", () => {
     });
 
     it("a raised floor takes effect immediately", async () => {
-      await paymaster.connect(owner).setMinSponsoredTip(ethers.parseEther("1"));
+      await paymaster.connect(owner).setMinSponsoredTip(ethers.parseEther("2"));
       await expect(validate(tipCallData(FLOOR))).to.be.revertedWithCustomError(
         paymaster,
         "TipBelowFloor"
@@ -294,7 +294,7 @@ describe("ArcTipPaymaster", () => {
 
       // The tip itself still goes through, with the fan paying their own gas.
       await expect(
-        tipJar.connect(fan).tip("rowan", "", 200, { value: ethers.parseEther("1") })
+        tipJar.connect(fan).tip("rowan", "", 100, { value: ethers.parseEther("1") })
       ).to.emit(tipJar, "Tipped");
 
       await paymaster.connect(owner).unpause();

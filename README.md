@@ -43,14 +43,22 @@ fees rather than a budget:
 |---|---|
 | `tip()` alone | 66–99k gas |
 | sponsored through ERC-4337 | ~186k gas ≈ **0.0039 USDC** |
-| 2% fee on a 1 USDC tip | **0.02 USDC** — about 5× the gas |
-| break-even tip | **0.196 USDC** |
+| 1% fee on a 1 USDC tip | **0.01 USDC** — 2.6× the gas |
+| break-even tip | **0.391 USDC** |
 
-That break-even is where `minSponsoredTip` (0.25 USDC) comes from. Below it a fan
-pays their own gas, which on Arc they already can. The floor is also the
-anti-drain measure: sponsorship is open to anyone, so it has to survive somebody
-tipping their own handle in a loop — each round trip costs the attacker the 2%
-fee and costs us less than that in gas.
+The fee is set to cover that gas and little else, not to take a margin. Below
+the break-even the fee stops paying for the sponsorship, which is where
+`minSponsoredTip` (1 USDC) comes from — set high enough that gas can rise two
+and a half times before any sponsored tip runs at a loss. Under the floor a fan
+pays their own gas, which on Arc they already can.
+
+The floor is also the anti-drain measure: sponsorship is open to anyone, so it
+has to survive somebody tipping their own handle in a loop — each round trip
+costs the attacker the fee and costs us less than that in gas.
+
+Fees are charged on every tip while only passkey wallets are sponsored, so a tip
+from a browser wallet pays the fee and costs nothing. Real cover is better than
+the figures above, which are the worst case.
 
 The paymaster only ever sponsors `tip`. It refuses `register`, which is free to
 call and would otherwise let anyone mint handles until the deposit ran dry.
@@ -98,7 +106,7 @@ Arc testnet is CCTP domain **26**; there is no published Arc mainnet domain yet.
 | TipJar | [`0x9BE91953aE20c079F8Ad932Ef6CF812f80aD217a`](https://testnet.arcscan.app/address/0x9BE91953aE20c079F8Ad932Ef6CF812f80aD217a) |
 | ArcTipPaymaster | not yet deployed |
 | EntryPoint (v0.7) | `0x0000000071727De22E5E9d8BAf0edAc6f37da032` — confirmed live on Arc |
-| Fee | 2% |
+| Fee | 1% |
 
 See [`contracts/deployments/arcTestnet.json`](contracts/deployments/arcTestnet.json).
 

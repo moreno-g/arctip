@@ -55,7 +55,7 @@
         <dl class="spec-strip">
           <div><dt>Network</dt><dd>Arc</dd></div>
           <div><dt>Settlement</dt><dd>&lt;2s</dd></div>
-          <div><dt>Fee</dt><dd>2%*</dd></div>
+          <div><dt>Fee</dt><dd>1%*</dd></div>
           <div><dt>Status</dt><dd>Testnet</dd></div>
         </dl>
       </div>
@@ -92,8 +92,8 @@
           </div>
           <div class="step">
             <div class="idx">05</div>
-            <h3>You keep 98%</h3>
-            <p>Straight to your wallet in USDC — 98% payout rate with zero platform setup required. Your fan's note comes attached if they left one.</p>
+            <h3>You keep 99%</h3>
+            <p>Straight to your wallet in USDC, with nothing to set up. Your fan's note comes attached if they left one.</p>
           </div>
         </div>
 
@@ -132,7 +132,7 @@
             <span class="status-tag is-building">Built, not yet deployed</span>
             <div class="cctp-icon">⛽</div>
             <h3>We pay the gas, the fee pays us back</h3>
-            <p>A sponsored tip costs about 0.0039 USDC in gas; the 2% fee on a 1 USDC tip is 0.02. The fee covers the gas roughly five times over, so sponsorship funds itself on-chain instead of running off a budget — and the ratio is a public counter you can read.</p>
+            <p>A sponsored tip costs about 0.0039 USDC in gas; the 1% fee on a 1 USDC tip is 0.01. The fee is set to cover that and little else, so sponsorship funds itself on-chain instead of running off a budget — and the ratio is a public counter you can read.</p>
           </div>
           <div class="cctp-card">
             <span class="status-tag is-building">Built, needs a Circle key</span>
@@ -160,11 +160,11 @@
 
         <div class="pricing-grid reveal">
           <div class="pricing-card">
-            <h3>98% lands directly</h3>
+            <h3>99% lands directly</h3>
             <p>The creator's share never touches an ArcTip balance. The contract splits the payment and pays the creator's wallet in the same transaction.</p>
           </div>
           <div class="pricing-card">
-            <h3>2%, capped in the contract</h3>
+            <h3>1%, capped in the contract</h3>
             <p><code>MAX_FEE_BPS</code> is a constant: the fee can never be raised above 5%, by us or by anyone else. Every tip also carries the highest fee its sender agreed to, so a raise mid-flight reverts instead of overcharging.</p>
           </div>
           <div class="pricing-card">
@@ -172,8 +172,8 @@
             <p>Nothing to buy, hold, or stake. Tips are USDC, the fee is USDC, payouts are USDC. There is no ArcTip token and the contract has no mechanism to mint one.</p>
           </div>
           <div class="pricing-card">
-            <h3>Where the 2% goes</h3>
-            <p>It funds the gas ArcTip sponsors on behalf of fans, then the hosting and the contract work. The treasury address is in the deployment record and readable on-chain.</p>
+            <h3>Where the 1% goes</h3>
+            <p>It exists to cover the gas ArcTip sponsors on behalf of fans, not to make a margin — a sponsored tip costs about 0.0039 USDC, and 1% of a 1 USDC tip is 0.01. The treasury address is in the deployment record and readable on-chain.</p>
           </div>
         </div>
       </div>
@@ -226,7 +226,7 @@
 
   <footer class="site-footer">
     <div class="wrap">
-      <span class="fine">* Standard 2% platform fee. ArcTip is an independent project built on Arc & Circle infrastructure — Arc is currently on testnet.</span>
+      <span class="fine">* Standard 1% platform fee. ArcTip is an independent project built on Arc & Circle infrastructure — Arc is currently on testnet.</span>
       <div class="social">
         <a href="https://x.com/Arctipxyz" target="_blank" rel="noopener">X / Twitter</a>
       </div>

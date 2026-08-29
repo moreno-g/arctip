@@ -27,7 +27,11 @@ contract TipJar is Ownable2Step, Pausable, ReentrancyGuard {
     uint256 private constant PAYOUT_GAS = 50_000;
 
     address public treasury;
-    uint16 public feeBps = 200; // 2% default (packed with treasury in slot 0)
+    /// @dev 1%, set to cover the gas ArcTipPaymaster sponsors rather than to make
+    ///      a margin. A sponsored tip costs ~0.0039 USDC at the gas price observed
+    ///      on Arc; 1% of a 1 USDC tip is 0.01, which covers it 2.6x and still
+    ///      holds if gas doubles. Packed with treasury in slot 0.
+    uint16 public feeBps = 100;
 
     // Readable counters. Deriving these from logs is not an option: Arc produces
     // ~187k blocks a day, and public RPCs reject unbounded eth_getLogs ranges,

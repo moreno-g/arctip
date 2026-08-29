@@ -55,8 +55,13 @@ node tools/circle-bundle/build.js   # régénère website/vendor/circle-passkey.
 - **`0x3600000000000000000000000000000000000000` est une vue ERC-20 du solde natif** : même argent,
   18 décimales en natif, 6 via l'ERC-20 (facteur 10¹²). Conséquence : **CCTP n'a besoin d'aucun
   wrapper ni contrat maison** — les fonds bridgés atterrissent dans le solde natif.
-- gasPrice observé : 21 gwei. Un tip sponsorisé ≈ 186k gas ≈ **0,0039 USDC**, contre 0,02 USDC de
-  frais sur un tip de 1 USDC. Point d'équilibre : **0,196 USDC** → d'où `minSponsoredTip` à 0,25.
+- gasPrice observé : 21 gwei. Un tip sponsorisé ≈ 186k gas ≈ **0,0039 USDC**.
+- **Les frais sont à 1 %**, calibrés pour couvrir ce gas et rien de plus : 0,01 USDC sur un tip de
+  1 USDC, soit 2,6× le gas. Point d'équilibre **0,391 USDC**, d'où `minSponsoredTip` à **1 USDC** —
+  le plancher tient jusqu'à un gas multiplié par 2,5. En dessous de 0,5 % on perd de l'argent dès
+  que le gas bouge : ne pas baisser sans refaire le calcul.
+- Les frais sont pris sur **tous** les tips, mais seuls ceux des wallets passkey sont sponsorisés :
+  un tip depuis un wallet navigateur rapporte les frais sans rien coûter.
 - CCTP : Arc testnet = domaine **26**. Pas de domaine Arc mainnet publié.
 
 ## Pièges
