@@ -1040,3 +1040,24 @@ a:focus-visible, button:focus-visible {
   .funding-addr .btn { align-self: stretch; min-height: 44px; }
   .funding-qr { flex-direction: column; align-items: flex-start; }
 }
+
+/* Resolving a handle means a round trip to an Arc RPC, which on a cold mobile
+   connection is a second or two of nothing. Say what is happening rather than
+   showing a bare "Loading…" — a fan who just tapped a link in a bio has no idea
+   whether the page is working. */
+.loading-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 10px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  vertical-align: middle;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .loading-dot { animation: handle-pulse 1.1s ease-in-out infinite; }
+  @keyframes handle-pulse {
+    0%, 100% { opacity: .25; transform: scale(.82); }
+    50%      { opacity: 1;   transform: scale(1); }
+  }
+}

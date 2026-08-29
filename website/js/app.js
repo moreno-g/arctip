@@ -94,32 +94,44 @@
     return handle || null;
   }
 
-  // Recent-tips is a best-effort convenience feature, so it only looks at a
-  // bounded recent window and fails quietly rather than breaking the dashboard —
-  // see findOwnHandle for why an unbounded query isn't an option here.
-  const RECENT_TIPS_BLOCK_WINDOW = 1000;
+  // Recent tips is best-effort: it fails quietly rather than breaking the
+  // dashboard, and never issues an unbounded query — see findOwnHandle for why.
+  //
+  // Arc produces a block every ~0.52s, so a single 1000-block window covered
+  // barely nine minutes: a creator coming back after lunch saw an empty list,
+  // with no way to tell "no tips" from "not looking far enough". So walk
+  // backwards in chunks instead, stopping as soon as there is enough to show —
+  // which on a handle with activity costs one request, exactly as before.
+  const TIP_CHUNK = 10000;      // ~1.5 hours of blocks per request
+  // Six, not more: a handle with tips stops at the first chunk, but one with
+  // none pays the full walk every time — and today every new creator has none.
+  const TIP_MAX_CHUNKS = 6;     // ~8.7 hours, enough to cover overnight
+  const TIP_TARGET = 10;        // rows worth showing
 
   async function loadRecentTips(address) {
     try {
       const readContract = await readContractPromise;
       const provider = readContract.runner.provider;
       const latest = await provider.getBlockNumber();
-      const fromBlock = Math.max(0, latest - RECENT_TIPS_BLOCK_WINDOW);
-      const events = await readContract.queryFilter(
-        readContract.filters.Tipped(null, address),
-        fromBlock,
-        latest
-      );
-      if (events.length === 0) {
+      const filter = readContract.filters.Tipped(null, address);
+
+      const found = [];
+      let to = latest;
+      for (let i = 0; i < TIP_MAX_CHUNKS && found.length < TIP_TARGET && to > 0; i++) {
+        const from = Math.max(0, to - TIP_CHUNK);
+        found.unshift(...(await readContract.queryFilter(filter, from, to)));
+        to = from - 1;
+      }
+
+      if (found.length === 0) {
+        const hours = Math.round((TIP_CHUNK * TIP_MAX_CHUNKS * 0.52) / 3600);
         tipList.replaceChildren(
-          hintNode(
-            `No tips in the last ${RECENT_TIPS_BLOCK_WINDOW} blocks — they'll show up here as they arrive.`
-          )
+          hintNode(`No tips in the last ${hours} hours — they'll show up here as they arrive.`)
         );
         return;
       }
       tipList.replaceChildren(
-        ...events.slice(-10).reverse().map((e) => tipRow(e.args))
+        ...found.slice(-TIP_TARGET).reverse().map((e) => tipRow(e.args))
       );
     } catch (err) {
       tipList.replaceChildren(
