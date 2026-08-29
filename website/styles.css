@@ -941,3 +941,40 @@ a:focus-visible, button:focus-visible {
   text-align: right;
 }
 .char-count.is-over { color: #8C1D18; font-weight: 700; }
+
+/* ---------- Mobile ergonomics ---------- */
+
+/* Touch targets. The tip page is used one-handed, on a phone, by someone who
+   arrived from a bio link — a 20px link is a miss waiting to happen. 44px is
+   the size both Apple and WCAG settle on. */
+@media (max-width: 860px) {
+  .payee-link,
+  .site-footer .social a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .btn-block { min-height: 48px; }
+
+  /* "10 USDC" wrapped onto two lines at 375px while its neighbours sat on one,
+     which made the row look broken rather than tight. */
+  .amount-btn {
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 0.86rem;
+    white-space: nowrap;
+    min-height: 48px;
+  }
+
+  /* The payee address is a 42-character hex string that took two lines at the
+     top of the card, above the amount the fan actually came to choose. Keep it
+     verifiable but out of the way: one line, truncated, full value on tap
+     through "Verify on ArcScan". */
+  .payee-addr {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+}

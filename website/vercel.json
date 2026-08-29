@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/@:handle",
-      "destination": "/tip.html"
+      "destination": "/api/tip?handle=:handle"
     },
     {
       "source": "/app",

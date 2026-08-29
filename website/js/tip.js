@@ -77,6 +77,11 @@
   let selectedAmount = null;
   const AMOUNT_RE = /^\d{1,12}(\.\d{1,18})?$/;
 
+  // The contract accepts any non-zero value, but a tip of dust costs more in gas
+  // than it moves, and it cannot be sponsored either — ArcTipPaymaster's floor
+  // is a whole USDC. A cent is the smallest amount that still means something.
+  const MIN_AMOUNT = 0.01;
+
   // Text as text — the strings here include wallet/RPC errors, which can carry
   // attacker-influenced contract data.
   function showMsg(text, kind) {
@@ -106,8 +111,13 @@
 
   customInput.addEventListener("input", () => {
     const raw = customInput.value.trim();
-    selectedAmount = AMOUNT_RE.test(raw) && Number(raw) > 0 ? raw : null;
-    refreshAffordability();
+    const valid = AMOUNT_RE.test(raw) && Number(raw) >= MIN_AMOUNT;
+    selectedAmount = valid ? raw : null;
+    if (raw && AMOUNT_RE.test(raw) && Number(raw) > 0 && Number(raw) < MIN_AMOUNT) {
+      showMsg(`The smallest tip is ${MIN_AMOUNT} USDC.`, "info");
+    } else {
+      refreshAffordability();
+    }
   });
 
   // --- wallet selection ---
@@ -334,7 +344,7 @@
     showMsg("", "");
 
     if (!selectedAmount) {
-      showMsg("Pick an amount first, or enter a valid number.", "error");
+      showMsg(`Pick an amount first, or enter a number of at least ${MIN_AMOUNT} USDC.`, "error");
       return;
     }
     if (!state.address) {
